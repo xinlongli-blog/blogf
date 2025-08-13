@@ -4,7 +4,7 @@ MySQL blog
 
 ## usage
 ```bash
-git clone https://github.com/xinlongli-blog/blog.git
+git clone https://github.com/xinlongli-blog/blogf.git
 cd blog
 ```
 <!--
