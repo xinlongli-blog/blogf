@@ -1,0 +1,39 @@
+dev(https://dev.mysql.com/doc/refman/5.7/en/monitor-alter-table-performance-schema.html)
+启动相关服务参数：
+
+UPDATE performance_schema.setup_instruments
+       SET ENABLED = 'YES'
+       WHERE NAME LIKE 'stage/innodb/alter%';
+
+ UPDATE performance_schema.setup_consumers
+       SET ENABLED = 'YES'
+       WHERE NAME LIKE '%stages%';
+
+--
+select stmt.SQL_TEXT as sql_text,
+       concat(WORK_COMPLETED, '/', WORK_ESTIMATED) as progress, --当前进度
+       (stage.TIMER_END - stmt.TIMER_START) / 1e12 as current_seconds, --运行时间 = 当前时间 - 语句开始时间
+       (stage.TIMER_END - stmt.TIMER_START) / 1e12 * (WORK_ESTIMATED - WORK_COMPLETED) /
+       WORK_COMPLETED as remaining_seconds --剩余时间估算 = 运行时间* （1-当前进度）
+from performance_schema.events_stages_current stage,
+     performance_schema.events_statements_current stmt
+where stage.THREAD_ID = stmt.THREAD_ID
+  and stage.NESTING_EVENT_ID = stmt.EVENT_ID; --关联键 = 进程号+父事件ID
+
+
+--原理
+mysql> SELECT *FROM performance_schema.events_stages_current\G;
+*************************** 1. row ***************************
+         THREAD_ID: 51
+          EVENT_ID: 34
+      END_EVENT_ID: NULL
+        EVENT_NAME: stage/innodb/alter table (insert) --当前阶段
+            SOURCE:
+       TIMER_START: 719028748009000
+         TIMER_END: 723982407319000		--任务未结束前 为当前时间
+        TIMER_WAIT: 4953659310000
+    WORK_COMPLETED: 15470995		--工作量评估
+    WORK_ESTIMATED: 19330513
+  NESTING_EVENT_ID: 6			--父事件id
+NESTING_EVENT_TYPE: STATEMENT
+1 row in set (0.00 sec)

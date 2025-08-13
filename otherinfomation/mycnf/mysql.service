@@ -1,0 +1,20 @@
+[Unit]
+Description=MySQL Server
+Documentation=man:mysqld(8)
+Documentation=http://dev.mysql.com/doc/refman/en/using-systemd.html
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+PIDFile=/data/mysql/mysql.pid
+User=mysql
+Group=mysql
+ExecStart=/usr/local/mysql/bin/mysqld_safe --defaults-file=/data/mysql/etc/my.cnf --pid-file=/data/mysql/mysql.pid
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+Restart=always
+RestartSec=10
+LimitNOFILE = 65535
+LimitNPROC = 65535

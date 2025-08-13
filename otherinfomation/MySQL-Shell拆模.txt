@@ -1,0 +1,1534 @@
+SELECT `URID`, `ORGID`, `NOTECODE`, `APPORGID`, `SETTLEMENTMODE`, `PAYTYPEID`, `PAYDATE`, `PAYOBJECTTYPE`, `PAYBANKACCOUNTNAME`, `RECOBJECTTYPE`, `RECORGID`, `RECBANKACCOUNTNAME`, `RECCURRENCYID`, `RECMONEY`, `MONEYWAY`, `FASTFLAG`, `OTHERREGIONFLAG`, `OTHERBANKFLAG`, `PAYCURRENCYID`, `EXCHANGERATE`
+INTO OUTFILE '/data/mysql/outfile/t_recments1.csv'
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+FROM t_recments;
+
+
+LOAD DATA INFILE '/data/mysql/outfile/t_recments.csv'
+     REPLACE INTO TABLE ats.t_recments_1
+     CHARACTER SET utf8mb4
+     FIELDS TERMINATED BY ','
+     ENCLOSED BY '"'
+     LINES TERMINATED BY '\n'
+     (@C1)
+     SET URID=@C1; -- 指定txt列与字段对应关系，
+	 
+	 
+LOAD DATA INFILE '/data/mysql/outfile/t_recments.csv'
+INTO TABLE t_recments_1
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+(@c1)
+set URID=@c1;
+
+
+LOAD DATA INFILE '/data/mysql/outfile/t_recments.csv'
+INTO TABLE t_recments_1
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(@URID)
+SET URID = @URID;  -- 将变量 @URID 的值插入到 t_recments_1 表的 URID 列中
+
+
+
+LOAD DATA INFILE '/data/mysql/outfile/t_recments.csv'
+INTO TABLE t_recments_1
+FIELDS TERMINATED BY ',' ENCLOSED BY '"'
+IGNORE 1 LINES
+(URID,iflag);
+
+LOAD DATA INFILE '/data/mysql/outfile/t_recments1.csv'
+REPLACE INTO TABLE t_recments_1
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+(@c1, @c2, @c3, @c4, @c5, @c6, @c7, @c8, @c9, @c10, @c11, @c12, @c13, @c14, @c15, @c16, @c17, @c18, @c19, @c20)
+SET URID = @c1, ORGID = @c2, NOTECODE = @c3, APPORGID = @c4, SETTLEMENTMODE = @c5, PAYTYPEID = @c6, PAYDATE = @c7, PAYOBJECTTYPE = @c8, PAYBANKACCOUNTNAME = @c9, RECOBJECTTYPE = @c10, RECORGID = @c11, RECBANKACCOUNTNAME = @c12, RECCURRENCYID = @c13, RECMONEY = @c14, MONEYWAY = @c15, FASTFLAG = @c16, OTHERREGIONFLAG = @c17, OTHERBANKFLAG = @c18, PAYCURRENCYID = @c19, EXCHANGERATE = @c20;
+
+
+tei 1
+Using username "root".
+root@172.18.100.59's password:
+Access denied
+root@172.18.100.59's password:
+Access denied
+root@172.18.100.59's password:
+Last failed login: Thu May 16 09:35:40 CST 2024 from 192.168.97.91 on ssh:notty
+There were 2 failed login attempts since the last successful login.
+Last login: Thu May 16 09:35:22 2024 from 192.168.97.91
+[root@dingjia-mysql ~]#
+[root@dingjia-mysql ~]# cd /opt/mysql-shell-8.0.34-linux-glibc2.12-x86-64bit/bin/
+[root@dingjia-mysql bin]# ll
+总用量 45936
+-rwxr-xr-x 1 7161 31415  8030216 6月  13 2023 mysql-secret-store-login-path
+-rwxr-xr-x 1 7161 31415 39003072 6月  13 2023 mysqlsh
+[root@dingjia-mysql bin]# ./mysql
+-bash: ./mysql: 没有那个文件或目录
+[root@dingjia-mysql bin]# ./mysqlsh
+MySQL Shell 8.0.34
+
+Copyright (c) 2016, 2023, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS > \py
+Switching to Python mode...
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = '                                                                                                                            t_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > def insert_data(table_name, data):
+          ->     placeholders = ', '.join(['%s'] * len(data))
+          ->     columns = ', '.join([f"`{col}`" for col in data.keys()])  # Wrap field names with backticks
+          ->     insert_query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+          ->     rs.run_sql(insert_query, tuple(data.values()))
+          -> for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->
+ MySQL  Py >     for field_name in field_names[i:i+20]:
+  File "<string>", line 1
+    for field_name in field_names[i:i+20]:
+IndentationError: unexpected indent
+ MySQL  Py >         column_type = column_info[field_name]
+  File "<string>", line 1
+    column_type = column_info[field_name]
+IndentationError: unexpected indent
+ MySQL  Py >         create_table_sql += f", `{field_name}` {column_type}"  # Wrap field names with backticks
+  File "<string>", line 1
+    create_table_sql += f", `{field_name}` {column_type}"  # Wrap field names with backticks
+IndentationError: unexpected indent
+ MySQL  Py >     create_table_sql += ")"
+  File "<string>", line 1
+    create_table_sql += ")"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(create_table_sql)
+ MySQL  Py >     rs.run_sql(create_table_sql)
+  File "<string>", line 1
+    rs.run_sql(create_table_sql)
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = '                                                                                                                            t_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", `{field_name}` {column_type}"  # Wrap field names with backticks
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->     old_table_data_query = f"SELECT {', '.join([f'`{field}`' for field in field_names[i:i+20]])} FRO                                                                                                                            M t_recments"
+          ->     old_table_data_result = rs.run_sql(old_table_data_query)
+          ->     old_table_data = old_table_data_result.fetch_all()
+          ->
+          ->     for row in old_table_data:
+          ->         data_to_insert = dict(zip(field_names[i:i+20], row))
+          ->         insert_data(table_name, data_to_insert)
+          ->
+^C^Z
+[1]+  已停止               ./mysqlsh
+[root@dingjia-mysql bin]# ./mysqlsh
+^C^Z
+[2]+  已停止               ./mysqlsh
+[root@dingjia-mysql bin]# ps -ef|grep mysqlsh
+root     26798 26745  1 09:35 pts/1    00:00:22 ./mysqlsh
+root     28175 26745  9 09:58 pts/1    00:00:03 ./mysqlsh
+root     28216 26745  0 09:59 pts/1    00:00:00 grep --color=auto mysqlsh
+[root@dingjia-mysql bin]# kill 26798
+[root@dingjia-mysql bin]# kill 28178
+-bash: kill: (28178) - 没有那个进程
+[root@dingjia-mysql bin]# kill 28175
+[root@dingjia-mysql bin]# ps -ef|grep mysqlsh
+root     26798 26745  1 09:35 pts/1    00:00:22 ./mysqlsh
+root     28175 26745  6 09:58 pts/1    00:00:03 ./mysqlsh
+root     28226 26745  0 09:59 pts/1    00:00:00 grep --color=auto mysqlsh
+[root@dingjia-mysql bin]# kill -9 28175
+[root@dingjia-mysql bin]# kill -9 28178
+-bash: kill: (28178) - 没有那个进程
+[2]+  已杀死               ./mysqlsh
+[root@dingjia-mysql bin]# ps -ef|grep mysqlsh
+root     26798 26745  1 09:35 pts/1    00:00:22 ./mysqlsh
+root     28241 26745  0 09:59 pts/1    00:00:00 grep --color=auto mysqlsh
+[root@dingjia-mysql bin]#
+[root@dingjia-mysql bin]# kill -9 26798
+[root@dingjia-mysql bin]# ps -ef|grep mysqlsh
+root     28252 26745  0 09:59 pts/1    00:00:00 grep --color=auto mysqlsh
+[1]+  已杀死               ./mysqlsh
+[root@dingjia-mysql bin]#
+[root@dingjia-mysql bin]#
+[root@dingjia-mysql bin]# ./mysqlsh
+MySQL Shell 8.0.34
+
+Copyright (c) 2016, 2023, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS > \py
+Switching to Python mode...
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = '                                                                                                                            t_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > def insert_data(table_name, data):
+          ->     placeholders = ', '.join(['%s'] * len(data))
+          ->     columns = ', '.join([f"`{col}`" for col in data.keys()])  # Wrap field names with backticks
+          ->     insert_query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+          ->     rs.run_sql(insert_query, tuple(data.values()))
+          -> for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", `{field_name}` {column_type}"  # Wrap field names with backticks
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->     insert_query = f"INSERT INTO {table_name} SELECT {', '.join([f'`{field}`' for field in field_nam                                                                                                                            es[i:i+20]])} FROM t_recments"
+          ->     rs.run_sql(insert_query)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 10, in <module>
+mysqlsh.DBError: MySQL Error (1136): ClassicSession.run_sql: Column count doesn't match value count at row 1
+ MySQL  Py > print(f"DEBUG: Insert query: {insert_query}")
+DEBUG: Insert query: INSERT INTO t_recments_1 SELECT `URID`, `ORGID`, `NOTECODE`, `APPORGID`, `SETTLEMENTMODE`, `                                                                                                                            PAYTYPEID`, `PAYDATE`, `PAYOBJECTTYPE`, `PAYBANKACCOUNTNAME`, `RECOBJECTTYPE`, `RECORGID`, `RECBANKACCOUNTNAME`,                                                                                                                             `RECCURRENCYID`, `RECMONEY`, `MONEYWAY`, `FASTFLAG`, `OTHERREGIONFLAG`, `OTHERBANKFLAG`, `PAYCURRENCYID`, `EXCHAN                                                                                                                            GERATE` FROM t_recments
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = '                                                                                                                            t_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > def insert_data(table_name, data, columns):
+          ->     placeholders = ', '.join(['%s'] * len(columns))
+          ->     insert_query = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})"
+          ->     rs.run_sql(insert_query, tuple(data[col] for col in columns))
+          -> for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     table_columns = []
+          ->     for field_name in field_names[i:i+20]:
+          ->         if field_name != 'id':  # Exclude the 'id' field
+          ->             column_type = column_info[field_name]
+          ->             create_table_sql += f", `{field_name}` {column_type}"  # Wrap field names with backticks
+
+          ->             table_columns.append(field_name)
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->     insert_query = f"INSERT INTO {table_name} ({', '.join(table_columns)}) SELECT {', '.join([f'`{fi                                                                                                                            eld}`' for field in field_names[i:i+20] if field != 'id'])} FROM t_recments"
+          ->     insert_data(table_name, {}, table_columns)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 13, in <module>
+  File "<string>", line 4, in insert_data
+  File "<string>", line 4, in <genexpr>
+KeyError: 'URID'
+ MySQL  Py > print(f"DEBUG: Insert query: {insert_query}")
+DEBUG: Insert query: INSERT INTO t_recments_1 (URID, ORGID, NOTECODE, APPORGID, SETTLEMENTMODE, PAYTYPEID, PAYDAT                                                                                                                            E, PAYOBJECTTYPE, PAYBANKACCOUNTNAME, RECOBJECTTYPE, RECORGID, RECBANKACCOUNTNAME, RECCURRENCYID, RECMONEY, MONEY                                                                                                                            WAY, FASTFLAG, OTHERREGIONFLAG, OTHERBANKFLAG, PAYCURRENCYID, EXCHANGERATE) SELECT `URID`, `ORGID`, `NOTECODE`, `                                                                                                                            APPORGID`, `SETTLEMENTMODE`, `PAYTYPEID`, `PAYDATE`, `PAYOBJECTTYPE`, `PAYBANKACCOUNTNAME`, `RECOBJECTTYPE`, `REC                                                                                                                            ORGID`, `RECBANKACCOUNTNAME`, `RECCURRENCYID`, `RECMONEY`, `MONEYWAY`, `FASTFLAG`, `OTHERREGIONFLAG`, `OTHERBANKF                                                                                                                            LAG`, `PAYCURRENCYID`, `EXCHANGERATE` FROM t_recments
+ MySQL  Py >
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+    rs.run_sql(insert_query, tuple(data[col] for col in columns))
+
+for i in range(0, len(field_names), 20):
+    table_name = f"t_recments_{i // 20 + 1}"
+    create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+    table_columns = []
+    for field_name in field_names[i:i+20]:
+        if field_name != 'id':
+            column_type = column_info[field_name]
+            create_table_sql += f", `{field_name}` {column_type}"
+            table_columns.append(field_name)
+    create_table_sql += ")"
+    rs.run_sql(create_table_sql)
+
+    insert_query = f"INSERT INTO {table_name} ({', '.join(table_columns)}) SELECT {', '.join([f'`{field}`' for fi                                                                                                                            eld in field_names[i:i+20] if field != 'id'])} FROM t_recments"
+    insert_data(table_name, {}, table_columns) MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM i                                                                                                                            nformation_sccolumns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = '                                                                                                                            t_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py >
+ MySQL  Py > def insert_data(table_name, data, columns):
+          ->     placeholders = ', '.join(['%s'] * len(columns))
+          ->     insert_query = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})"
+          ->     rs.run_sql(insert_query, tuple(data[col] for col in columns))
+          ->
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     table_columns = []
+          ->     for field_name in field_names[i:i+20]:
+          ->         if field_name != 'id':
+          ->             column_type = column_info[field_name]
+          ->             create_table_sql += f", `{field_name}` {column_type}"
+          ->             table_columns.append(field_name)
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->
+          ->     insert_query = f"INSERT INTO {table_name} ({', '.join(table_columns)}) SELECT {', '.join([f'`{fi                                                                                                                            eld}`' for field in field_names[i:i+20] if field != 'id'])} FROM t_recments"
+          ->     insert_data(table_name, {}, table_columns)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 11, in <module>
+mysqlsh.DBError: MySQL Error (1050): ClassicSession.run_sql: Table 't_recments_1' already exists
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = '                                                                                                                            t_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py >
+ MySQL  Py > def insert_data(table_name, data, columns):
+          ->     placeholders = ', '.join(['%s'] * len(columns))
+          ->     insert_query = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})"
+          ->     rs.run_sql(insert_query, tuple(data[col] for col in columns))
+          ->
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     table_columns = []
+          ->     for field_name in field_names[i:i+20]:
+          ->         if field_name != 'id':
+          ->             column_type = column_info[field_name]
+          ->             create_table_sql += f", `{field_name}` {column_type}"
+          ->             table_columns.append(field_name)
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->
+          ->     insert_query = f"INSERT INTO {table_name} ({', '.join(table_columns)}) SELECT {', '.join([f'`{fi                                                                                                                            eld}`' for field in field_names[i:i+20] if field != 'id'])} FROM t_recments"
+          ->     insert_data(table_name, {}, table_columns)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 14, in <module>
+  File "<string>", line 4, in insert_data
+  File "<string>", line 4, in <genexpr>
+KeyError: 'URID'
+ MySQL  Py > print(f"DEBUG: Insert query: {insert_query}")
+DEBUG: Insert query: INSERT INTO t_recments_1 (URID, ORGID, NOTECODE, APPORGID, SETTLEMENTMODE, PAYTYPEID, PAYDAT                                                                                                                            E, PAYOBJECTTYPE, PAYBANKACCOUNTNAME, RECOBJECTTYPE, RECORGID, RECBANKACCOUNTNAME, RECCURRENCYID, RECMONEY, MONEY                                                                                                                            WAY, FASTFLAG, OTHERREGIONFLAG, OTHERBANKFLAG, PAYCURRENCYID, EXCHANGERATE) SELECT `URID`, `ORGID`, `NOTECODE`, `                                                                                                                            APPORGID`, `SETTLEMENTMODE`, `PAYTYPEID`, `PAYDATE`, `PAYOBJECTTYPE`, `PAYBANKACCOUNTNAME`, `RECOBJECTTYPE`, `REC                                                                                                                            ORGID`, `RECBANKACCOUNTNAME`, `RECCURRENCYID`, `RECMONEY`, `MONEYWAY`, `FASTFLAG`, `OTHERREGIONFLAG`, `OTHERBANKF                                                                                                                            LAG`, `PAYCURRENCYID`, `EXCHANGERATE` FROM t_recments
+ MySQL  Py > print(f"{insert_query}")
+INSERT INTO t_recments_1 (URID, ORGID, NOTECODE, APPORGID, SETTLEMENTMODE, PAYTYPEID, PAYDATE, PAYOBJECTTYPE, PAYBANKACCOUNTNAME, RECOBJECTTYPE, RECORGID, RECBANKACCOUNTNAME, RECCURRENCYID, RECMONEY, MONEYWAY, FASTFLAG, OTHERREGIONFLAG, OTHERBANKFLAG, PAYCURRENCYID, EXCHANGERATE) SELECT `URID`, `ORGID`, `NOTECODE`, `APPORGID`, `SETTLEMENTMODE`, `PAYTYPEID`, `PAYDATE`, `PAYOBJECTTYPE`, `PAYBANKACCOUNTNAME`, `RECOBJECTTYPE`, `RECORGID`, `RECBANKACCOUNTNAME`, `RECCURRENCYID`, `RECMONEY`, `MONEYWAY`, `FASTFLAG`, `OTHERREGIONFLAG`, `OTHERBANKFLAG`, `PAYCURRENCYID`, `EXCHANGERATE` FROM t_recments
+ MySQL  Py > insert_query = f"INSERT INTO `{table_name}` ({', '.join([f'`{col}`' for col in table_columns])}) SELECT {', '.join([f'`{field}`' for field in field_names[i:i+20] if field != 'id'])} FROM t_recments"
+ MySQL  Py > print(f"{insert_query}")
+INSERT INTO `t_recments_1` (`URID`, `ORGID`, `NOTECODE`, `APPORGID`, `SETTLEMENTMODE`, `PAYTYPEID`, `PAYDATE`, `PAYOBJECTTYPE`, `PAYBANKACCOUNTNAME`, `RECOBJECTTYPE`, `RECORGID`, `RECBANKACCOUNTNAME`, `RECCURRENCYID`, `RECMONEY`, `MONEYWAY`, `FASTFLAG`, `OTHERREGIONFLAG`, `OTHERBANKFLAG`, `PAYCURRENCYID`, `EXCHANGERATE`) SELECT `URID`, `ORGID`, `NOTECODE`, `APPORGID`, `SETTLEMENTMODE`, `PAYTYPEID`, `PAYDATE`, `PAYOBJECTTYPE`, `PAYBANKACCOUNTNAME`, `RECOBJECTTYPE`, `RECORGID`, `RECBANKACCOUNTNAME`, `RECCURRENCYID`, `RECMONEY`, `MONEYWAY`, `FASTFLAG`, `OTHERREGIONFLAG`, `OTHERBANKFLAG`, `PAYCURRENCYID`, `EXCHANGERATE` FROM t_recments
+ MySQL  Py >
+
+tei 2
+Using username "root".
+root@172.18.100.59's password:
+Access denied
+root@172.18.100.59's password:
+Last failed login: Wed May 15 14:35:07 CST 2024 from 192.168.97.91 on ssh:notty
+There was 1 failed login attempt since the last successful login.
+Last login: Wed May 15 14:25:44 2024 from 192.168.97.91
+[root@dingjia-mysql ~]# cd /opt/mysql-shell-8.0.34-linux-glibc2.12-x86-64bit/bin/
+[root@dingjia-mysql bin]# ./mysqlsh
+MySQL Shell 8.0.34
+
+Copyright (c) 2016, 2023, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS > \py
+Switching to Python mode...
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats
+  File "<string>", line 1
+    conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats
+            ^
+SyntaxError: unterminated string literal (detected at line 1)
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+mysqlsh.DBError: MySQL Error (2026): mysql.get_classic_session: SSL connection error: SSL is required but the server doesn't support it
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl_disabled=True'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ValueError: mysql.get_classic_session: Argument #1: Invalid URI: Invalid connection option 'ssl_disabled'.
+
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl_ca=None'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ValueError: mysql.get_classic_session: Argument #1: Invalid URI: Invalid connection option 'ssl_ca'.
+
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > rs.run_sql('select * from mysql.user')
++----------------+---------------+-------------+-------------+-------------+-------------+-------------+-----------+-------------+---------------+--------------+-----------+------------+-----------------+------------+------------+--------------+------------+-----------------------+------------------+--------------+-----------------+------------------+------------------+----------------+---------------------+--------------------+------------------+------------+--------------+------------------------+----------+------------+-------------+--------------+---------------+-------------+-----------------+----------------------+-----------------------+-------------------------------------------+------------------+-----------------------+-------------------+----------------+
+| Host           | User          | Select_priv | Insert_priv | Update_priv | Delete_priv | Create_priv | Drop_priv | Reload_priv | Shutdown_priv | Process_priv | File_priv | Grant_priv | References_priv | Index_priv | Alter_priv | Show_db_priv | Super_priv | Create_tmp_table_priv | Lock_tables_priv | Execute_priv | Repl_slave_priv | Repl_client_priv | Create_view_priv | Show_view_priv | Create_routine_priv | Alter_routine_priv | Create_user_priv | Event_priv | Trigger_priv | Create_tablespace_priv | ssl_type | ssl_cipher | x509_issuer | x509_subject | max_questions | max_updates | max_connections | max_user_connections | plugin                | authentication_string                     | password_expired | password_last_changed | password_lifetime | account_locked |
++----------------+---------------+-------------+-------------+-------------+-------------+-------------+-----------+-------------+---------------+--------------+-----------+------------+-----------------+------------+------------+--------------+------------+-----------------------+------------------+--------------+-----------------+------------------+------------------+----------------+---------------------+--------------------+------------------+------------+--------------+------------------------+----------+------------+-------------+--------------+---------------+-------------+-----------------+----------------------+-----------------------+-------------------------------------------+------------------+-----------------------+-------------------+----------------+
+| localhost      | root          | Y           | Y           | Y           | Y           | Y           | Y         | Y           | Y             | Y            | Y         | Y          | Y               | Y          | Y          | Y            | Y          | Y                     | Y                | Y            | Y               | Y                | Y                | Y              | Y                   | Y                  | Y                | Y          | Y            | Y                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *611955B08B68CB5C8933A804BB88B8257843A400 | N                | 2023-06-14 14:11:58   |              NULL | N              |
+| localhost      | mysql.session | N           | N           | N           | N           | N           | N         | N           | N             | N            | N         | N          | N               | N          | N          | N            | Y          | N                     | N                | N            | N               | N                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE | N                | 2020-09-07 10:05:33   |              NULL | Y              |
+| localhost      | mysql.sys     | N           | N           | N           | N           | N           | N         | N           | N             | N            | N         | N          | N               | N          | N          | N            | N          | N                     | N                | N            | N               | N                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE | N                | 2020-09-07 10:05:33   |              NULL | Y              |
+| %              | root          | Y           | Y           | Y           | Y           | Y           | Y         | Y           | Y             | Y            | Y         | Y          | Y               | Y          | Y          | Y            | Y          | Y                     | Y                | Y            | Y               | Y                | Y                | Y              | Y                   | Y                  | Y                | Y          | Y            | Y                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *611955B08B68CB5C8933A804BB88B8257843A400 | N                | 2023-06-14 14:11:58   |              NULL | N              |
+| 192.168.100.%  | rep           | N           | N           | N           | N           | N           | N         | N           | N             | N            | N         | N          | N               | N          | N          | N            | N          | N                     | N                | N            | Y               | N                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *EBAE1D2EF93012191D177ED0FF1C23CF235A9892 | N                | 2020-09-07 10:53:10   |              NULL | N              |
+| %              | us_ats        | N           | N           | N           | N           | N           | N         | N           | N             | N            | N         | N          | N               | N          | N          | N            | N          | N                     | N                | N            | N               | N                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *51226551506EA321AFB59045CBEEEC8205E6A941 | N                | 2020-09-08 18:27:35   |              NULL | N              |
+| %              | ssf           | N           | N           | N           | N           | N           | N         | N           | N             | N            | N         | N          | N               | N          | N          | N            | N          | N                     | N                | N            | N               | N                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *E400CEE1E41D5C77613499EEBD4ED4548B788922 | N                | 2020-10-10 21:09:43   |              NULL | N              |
+| 192.168.100.24 | east          | N           | N           | N           | N           | N           | N         | N           | N             | N            | N         | N          | N               | N          | N          | N            | N          | N                     | N                | N            | N               | N                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *8FF90279FE4DC0307E084263608D9949E78D2CF9 | N                | 2023-08-01 14:09:36   |              NULL | N              |
+| %              | dbmonitor     | Y           | N           | N           | N           | N           | N         | N           | N             | Y            | N         | N          | N               | N          | N          | N            | Y          | N                     | N                | N            | N               | Y                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    3 | mysql_native_password | *A923EA021086272BC943A64022A81ED358397371 | N                | 2022-08-03 10:46:57   |              NULL | N              |
+| %              | PythonMoto    | N           | N           | N           | N           | N           | N         | N           | N             | N            | N         | N          | N               | N          | N          | N            | N          | N                     | N                | N            | N               | N                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *9A95A6C6D1F92E9F75DF7B9B4BA604DCEECDE402 | N                | 2023-07-19 14:00:05   |              NULL | N              |
+| %              | us_ats_read   | N           | N           | N           | N           | N           | N         | N           | N             | N            | N         | N          | N               | N          | N          | N            | N          | N                     | N                | N            | N               | N                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *85F1DDABB9B54EEA9C6930437DA40EC255FFC44E | N                | 2022-08-12 13:46:07   |              NULL | N              |
+| %              | bkpuser       | N           | N           | N           | N           | N           | N         | Y           | N             | Y            | N         | N          | N               | N          | N          | N            | N          | N                     | Y                | N            | N               | Y                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *F0D37AC9C529D013C22D0BE036E78873D13D8F64 | N                | 2023-05-11 15:27:01   |              NULL | N              |
+| %              | tanjp         | N           | N           | N           | N           | N           | N         | N           | N             | N            | N         | N          | N               | N          | N          | N            | N          | N                     | N                | N            | N               | N                | N                | N              | N                   | N                  | N                | N          | N            | N                      |          | 0x         | 0x          | 0x           |             0 |           0 |               0 |                    0 | mysql_native_password | *CA81C721A401B420635BAFE4268B5AF48B62BF0D | N                | 2023-10-24 10:07:19   |                90 | N              |
++----------------+---------------+-------------+-------------+-------------+-------------+-------------+-----------+-------------+---------------+--------------+-----------+------------+-----------------+------------+------------+--------------+------------+-----------------------+------------------+--------------+-----------------+------------------+------------------+----------------+---------------------+--------------------+------------------+------------+--------------+------------------------+----------+------------+-------------+--------------+---------------+-------------+-----------------+----------------------+-----------------------+-------------------------------------------+------------------+-----------------------+-------------------+----------------+
+13 rows in set (0.0412 sec)
+ MySQL  Py > rs.run_sql('select user,host from mysql.user')
++---------------+----------------+
+| user          | host           |
++---------------+----------------+
+| PythonMoto    | %              |
+| bkpuser       | %              |
+| dbmonitor     | %              |
+| root          | %              |
+| ssf           | %              |
+| tanjp         | %              |
+| us_ats        | %              |
+| us_ats_read   | %              |
+| rep           | 192.168.100.%  |
+| east          | 192.168.100.24 |
+| mysql.session | localhost      |
+| mysql.sys     | localhost      |
+| root          | localhost      |
++---------------+----------------+
+13 rows in set (0.0069 sec)
+ MySQL  Py > rs.run_sql('show databases;')
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| ats                |
+| mysql              |
+| performance_schema |
+| sys                |
+| testdb             |
++--------------------+
+6 rows in set (0.0036 sec)
+ MySQL  Py >
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > for i in range(1,11):
+          ->     f_list1 = []
+          ->     f_list2 = []
+          ->     for j in range(1,11):
+          ->         f_list1.append('r' + str(j + (i-1)*10) + ' int')
+          ->         f_list2.append('r' + str(j + (i-1)*10))
+          ->     rs.run_sql('create table t_recments' + str(i) +'( id serial primary key,'+ ','.join(f_list1) + ')')
+          ->     rs.run_sql('insert into t_recments' + str(i) +' select id,' + ','.join(f_list2) + ' from t_large')
+          ->
+Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+mysqlsh.DBError: MySQL Error (1146): ClassicSession.run_sql: Table 'ats.t_large' doesn't exist
+ MySQL  Py > for i in range(1,11):
+          ->     f_list1 = []
+          ->     f_list2 = []
+          ->     for j in range(1,11):
+          ->         f_list1.append('r' + str(j + (i-1)*10) + ' int')
+          ->         f_list2.append('r' + str(j + (i-1)*10))
+          ->     rs.run_sql('create table t_recments' + str(i) +'( id serial primary key,'+ ','.join(f_list1) + ')')
+          ->     rs.run_sql('insert into t_recments' + str(i) +' select id,' + ','.join(f_list2) + ' from t_recments')
+          ->
+Traceback (most recent call last):
+  File "<string>", line 7, in <module>
+mysqlsh.DBError: MySQL Error (1050): ClassicSession.run_sql: Table 't_recments1' already exists
+ MySQL  Py > ^C
+ MySQL  Py > for i in range(1,11):
+          ->     f_list1 = []
+          ->     f_list2 = []
+          ->     for j in range(1,11):
+          ->         # 获取字段名，假设字段名为 r1, r2, ..., r100
+          ->         field_name = 'r' + str(j + (i-1)*10)
+          ->         f_list1.append(field_name + ' int')
+          ->         f_list2.append(field_name)
+          ->
+          ->     # 创建表
+          ->     create_table_sql = 'CREATE TABLE t_recments' + str(i) + '(id SERIAL PRIMARY KEY, ' + ', '.join(f_list1) + ')'
+          ->     rs.run_sql(create_table_sql)
+          ->
+Query OK, 0 rows affected (0.0554 sec)
+ MySQL  Py >  for i in range(1, 11):
+  File "<string>", line 1
+    for i in range(1, 11):
+IndentationError: unexpected indent
+ MySQL  Py >      table_name = 't_recments' + str(i)
+  File "<string>", line 1
+    table_name = 't_recments' + str(i)
+IndentationError: unexpected indent
+ MySQL  Py >      rs.run_sql('DROP TABLE IF EXISTS ' + table_name)
+  File "<string>", line 1
+    rs.run_sql('DROP TABLE IF EXISTS ' + table_name)
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py > for i in range(1, 11):
+          ->     table_name = 't_recments' + str(i)
+          ->     rs.run_sql('DROP TABLE IF EXISTS ' + table_name)
+          ->
+Query OK, 0 rows affected (0.0217 sec)
+ MySQL  Py > for i in range(1,11):
+          ->     # 生成表字段的列表
+          ->     field_list = ['r' + str(j) + ' int' for j in range(1 + (i-1)*10, 11 + (i-1)*10)]
+          ->
+ MySQL  Py >     # 创建表
+ MySQL  Py >     create_table_sql = f"CREATE TABLE t_recments{i} (id SERIAL PRIMARY KEY, {', '.join(field_list)})"
+  File "<string>", line 1
+    create_table_sql = f"CREATE TABLE t_recments{i} (id SERIAL PRIMARY KEY, {', '.join(field_list)})"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(create_table_sql)
+  File "<string>", line 1
+    rs.run_sql(create_table_sql)
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py >     # 插入数据
+ MySQL  Py >     insert_data_sql = f"INSERT INTO t_recments{i} SELECT id, {', '.join(field_list)} FROM t_recments"
+  File "<string>", line 1
+    insert_data_sql = f"INSERT INTO t_recments{i} SELECT id, {', '.join(field_list)} FROM t_recments"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(insert_data_sql)
+  File "<string>", line 1
+    rs.run_sql(insert_data_sql)
+IndentationError: unexpected indent
+ MySQL  Py > for i in range(1,11):
+          ->     field_list = ['r' + str(j) + ' int' for j in range(1 + (i-1)*10, 11 + (i-1)*10)]
+          ->     create_table_sql = f"CREATE TABLE t_recments{i} (id SERIAL PRIMARY KEY, {', '.join(field_list)})"
+          ->     rs.run_sql(create_table_sql)
+          ->     insert_data_sql = f"INSERT INTO t_recments{i} SELECT id, {', '.join(field_list)} FROM t_recments"
+          ->     rs.run_sql(insert_data_sql)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+mysqlsh.DBError: MySQL Error (1064): ClassicSession.run_sql: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'int, r2 int, r3 int, r4 int, r5 int, r6 int, r7 int, r8 int, r9 int, r10 int FRO' at line 1
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name = 't_recments' AND table_schema = DATABASE()"
+Query OK, 0 rows affected (0.0236 sec)
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > column_names = [row[0] for row in columns_result]
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+TypeError: 'shell.Object' object is not iterable
+ MySQL  Py >
+ MySQL  Py > tables_fields = [column_names[i:i+10] for i in range(0, len(column_names), 10)]
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+NameError: name 'column_names' is not defined
+ MySQL  Py >
+ MySQL  Py > for i, fields in enumerate(tables_fields, start=1):
+          ->     field_list = [f"{field} int" for field in fields]
+          ->     create_table_sql = f"CREATE TABLE t_recments{i} (id SERIAL PRIMARY KEY, {', '.join(field_list)})"
+          ->
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+NameError: name 'tables_fields' is not defined
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py > column_names = []
+ MySQL  Py > for row in columns_result:
+          ->     column_names.append(row[0])
+          -> print(column_names)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+TypeError: 'shell.Object' object is not iterable
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME FROM information_schema.columns WHERE table_name = 't_recments' AND table_schema = DATABASE()"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > column_names = []
+ MySQL  Py > for row in columns_result:
+          ->     column_names.append(row[0])
+          -> print(column_names)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+TypeError: 'shell.Object' object is not iterable
+ MySQL  Py > print(type(columns_result))
+<class 'shell.Object'>
+ MySQL  Py > columns_result.dump()
++-----------------------+
+| COLUMN_NAME           |
++-----------------------+
+| URID                  |
+| ORGID                 |
+| NOTECODE              |
+| APPORGID              |
+| SETTLEMENTMODE        |
+| PAYTYPEID             |
+| PAYDATE               |
+| PAYOBJECTTYPE         |
+| PAYBANKACCOUNTNAME    |
+| RECOBJECTTYPE         |
+| RECORGID              |
+| RECBANKACCOUNTNAME    |
+| RECCURRENCYID         |
+| RECMONEY              |
+| MONEYWAY              |
+| FASTFLAG              |
+| OTHERREGIONFLAG       |
+| OTHERBANKFLAG         |
+| PAYCURRENCYID         |
+| EXCHANGERATE          |
+| PAYMONEY              |
+| DEALTYPE              |
+| DIRECTPAYWAY          |
+| APPROVESTATE          |
+| CANCELSTATE           |
+| PAYSTATE              |
+| CHONGHONGSTATE        |
+| PAYCHECKSTATE         |
+| RECCHECKSTATE         |
+| ACCOUNTFLAG           |
+| VALIDATESTATE         |
+| CASHJOURNAL           |
+| ISPRIVATE             |
+| ISACTIVE              |
+| CREATEDBY             |
+| CREATEDON             |
+| LASTMODIFIEDBY        |
+| LASTMODIFIEDON        |
+| ROWVERSION            |
+| PERMISSIONBIT         |
+| CAPITALUSEID          |
+| BUDGETITEMID          |
+| CHECKCODE             |
+| VALIDATIONDESCRIPTION |
+| PAYORGID              |
+| PAYNAMEID             |
+| PAYNAME               |
+| PAYBANKLOCATIONS      |
+| PAYBANKACCOUNT        |
+| PAYBANKSID            |
+| PAYDIRECTBANKCODE     |
+| PAYBANKAREAID         |
+| PAYBANKAREACODE       |
+| PAYBANKAREANAME       |
+| RECNAMEID             |
+| RECNAME               |
+| RECBANKLOCATIONS      |
+| RECBANKACCOUNT        |
+| RECBANKSID            |
+| RECDIRECTBANKCODE     |
+| RECBANKAREAID         |
+| RECBANKAREACODE       |
+| RECBANKAREANAME       |
+| CNAPS                 |
+| ABSTRACT              |
+| DIRECTCURCODE         |
+| PURPOSE               |
+| ASKNUMBER             |
+| ORIGINNOTE            |
+| DIRECTACCESSCODE      |
+| COMMANDCODE           |
+| CERTTYPE              |
+| CERTNUMBER            |
+| CREDITCARDSECCODE     |
+| CREDITCARDVALIDITY    |
+| CARDTYPE              |
+| CHONGHONGREASON       |
+| PAYMADEDATE           |
+| PAYINFOCODE           |
+| PAYINFO               |
+| ACCOUNTSTATEDATE      |
+| ACCOUNTINFO           |
+| ACCOUNTBATCHNO        |
+| REQBATCHNO            |
+| PSSELNUM              |
+| SPLITNUM              |
+| PAYCHECKBATCHNO       |
+| RECCHECKBATCHNO       |
+| SUMACCOUNTFLAG        |
+| OFFICEPURPOSE         |
+| RECORDSOURCEID        |
+| RECORDSOURCEBATNO     |
+| GENERATESTATE         |
+| PAYPERSONID           |
+| PAYSENTDATE           |
+| PAYCHECKDATE          |
+| RECCHECKDATE          |
+| SOURCENOTECODE        |
+| VALIDATEINFO          |
+| memo                  |
+| DESCRIPTION           |
+| PAYCHECKINFO          |
+| RECCHECKINFO          |
+| CLEARCODE             |
+| PAYAPPROVEDDATE       |
+| RETURNSTATE           |
+| RECORDSOURCE          |
+| PREPMONEY             |
+| FORCE                 |
+| FASTPAY               |
+| RECEIVEDATE           |
+| DUTYCENTERID          |
+| CORPACCESSSYSTEMSID   |
+| ATTACHMENT1           |
+| ATTACHMENT2           |
+| ATTACHMENT3           |
+| ATTACHMENT4           |
+| CUSTOMNO              |
+| CELLPHONE             |
+| BANKSEQNO             |
++-----------------------+
+120 rows in set (0.0020 sec)
+ MySQL  Py > column_names = []
+ MySQL  Py > for row in columns_result.rows:
+          ->     column_names.append(row[0])
+          -> tables_fields = [column_names[i:i+10] for i in range(0, len(column_names), 10)]
+          -> for i, fields in enumerate(tables_fields, start=1):
+          ->     field_list = [f"{field} int" for field in fields]
+          ->     create_table_sql = f"CREATE TABLE t_recments{i} (id SERIAL PRIMARY KEY, {', '.join(field_list)})"
+          ->     rs.run_sql(create_table_sql)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+AttributeError: unknown attribute: rows
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py >
+ MySQL  Py > # 从行数据中提取列名
+ MySQL  Py > column_names = [row[0] for row in all_rows]
+ MySQL  Py >
+ MySQL  Py > # 将字段名拆分为每个表的字段列表
+ MySQL  Py > tables_fields = [column_names[i:i+10] for i in range(0, len(column_names), 10)]
+ MySQL  Py >
+ MySQL  Py > # 创建表并插入数据
+ MySQL  Py > for i, fields in enumerate(tables_fields, start=1):
+          ->     # 生成表字段的列表
+          ->     field_list = [f"{field} INT" for field in fields]
+          ->
+ MySQL  Py >     # 创建表
+ MySQL  Py >     create_table_sql = f"CREATE TABLE t_recments{i} (id SERIAL PRIMARY KEY, {', '.join(field_list)})"
+  File "<string>", line 1
+    create_table_sql = f"CREATE TABLE t_recments{i} (id SERIAL PRIMARY KEY, {', '.join(field_list)})"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(create_table_sql)
+  File "<string>", line 1
+    rs.run_sql(create_table_sql)
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_names = [row[0] for row in all_rows]
+ MySQL  Py > tables_fields = [column_names[i:i+10] for i in range(0, len(column_names), 10)]
+ MySQL  Py > for i, fields in enumerate(tables_fields, start=1):
+          ->
+          -> field_list_str = ', '.join(field_list)
+          -> create_table_sql = "CREATE TABLE t_recments{} (id SERIAL PRIMARY KEY, {})".format(i, field_list_str)
+
+          ->
+          ->     rs.run_sql(create_table_sql)
+          ->
+          ->
+          ->
+          ->     insert_data_sql = f"INSERT INTO t_recments{i} SELECT id, {', '.join(fields)} FROM t_recments"
+          ->     rs.run_sql(insert_data_sql)
+          ->
+          ->
+          ->
+          ->
+          ->
+          ->
+          ->
+          -> ;
+          ->
+          ->
+          -> ^C
+ MySQL  Py > tables_fields = [column_names[i:i+10] for i in range(0, len(column_names), 10)]
+ MySQL  Py > ^C
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py > \q
+Bye!
+
+[root@dingjia-mysql bin]#
+[root@dingjia-mysql bin]#
+[root@dingjia-mysql bin]#
+[root@dingjia-mysql bin]#
+[root@dingjia-mysql bin]#
+[root@dingjia-mysql bin]#
+[root@dingjia-mysql bin]# ./mysqlsh
+^LMySQL Shell 8.0.34
+
+Copyright (c) 2016, 2023, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS >
+ MySQL  JS > \py
+Switching to Python mode...
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = 't_recments' AND TABLE_SCHEMA = 'your_database_name'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_names = [row[0] for row in all_rows]
+ MySQL  Py > tables_fields = [column_names[i:i+10] for i in range(0, len(column_names), 10)]
+ MySQL  Py > for i, fields in enumerate(tables_fields, start=1):
+          ->     field_list = [f"{field} INT" for field in fields]
+          ->     field_list_str = ', '.join(field_list)
+          ->     create_table_sql = "CREATE TABLE t_recments{} (id SERIAL PRIMARY KEY, {})".format(i, field_list_str)
+          ->     rs.run_sql(create_table_sql)
+          ->
+ MySQL  Py > # 使用 dump 方法查看对象内容
+ MySQL  Py > columns_result.dump()
+Empty set (0.0012 sec)
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = 't_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py >
+ MySQL  Py > column_names = [row[0] for row in all_rows]
+ MySQL  Py >
+ MySQL  Py > tables_fields = [column_names[i:i+10] for i in range(0, len(column_names), 10)]
+ MySQL  Py > for i, fields in enumerate(tables_fields, start=1):
+          ->     field_list = [f"{field} INT" for field in fields]
+          ->     field_list_str = ', '.join(field_list)
+          ->     create_table_sql = "CREATE TABLE t_recments{} (id SERIAL PRIMARY KEY, {})".format(i, field_list_str)
+          ->     rs.run_sql(create_table_sql)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+mysqlsh.DBError: MySQL Error (1064): ClassicSession.run_sql: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FORCE INT, FASTPAY INT)' at line 1
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+Query OK, 0 rows affected (0.1730 sec)
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py >
+ MySQL  Py > schema = session.get_schema("ats")
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+AttributeError: 'NoneType' object has no attribute 'get_schema'
+ MySQL  Py > columns_result = schema.get_table("t_recments").select("COLUMN_NAME", "COLUMN_TYPE").execute()
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+NameError: name 'schema' is not defined
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,column_type FROM information_schema.COLUMNS WHERE TABLE_NAME = 't_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > rs.run.sql(columns_query)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+AttributeError: unknown attribute: run
+ MySQL  Py > rs.run_sql(columns_query)
++-----------------------+--------------+
+| COLUMN_NAME           | column_type  |
++-----------------------+--------------+
+| URID                  | varchar(32)  |
+| ORGID                 | varchar(32)  |
+| NOTECODE              | varchar(32)  |
+| APPORGID              | varchar(32)  |
+| SETTLEMENTMODE        | varchar(32)  |
+| PAYTYPEID             | varchar(32)  |
+| PAYDATE               | datetime     |
+| PAYOBJECTTYPE         | char(1)      |
+| PAYBANKACCOUNTNAME    | text         |
+| RECOBJECTTYPE         | char(1)      |
+| RECORGID              | varchar(32)  |
+| RECBANKACCOUNTNAME    | text         |
+| RECCURRENCYID         | varchar(32)  |
+| RECMONEY              | double       |
+| MONEYWAY              | char(1)      |
+| FASTFLAG              | char(1)      |
+| OTHERREGIONFLAG       | char(1)      |
+| OTHERBANKFLAG         | char(1)      |
+| PAYCURRENCYID         | varchar(32)  |
+| EXCHANGERATE          | double       |
+| PAYMONEY              | double       |
+| DEALTYPE              | decimal(2,0) |
+| DIRECTPAYWAY          | char(1)      |
+| APPROVESTATE          | char(1)      |
+| CANCELSTATE           | char(1)      |
+| PAYSTATE              | char(1)      |
+| CHONGHONGSTATE        | char(1)      |
+| PAYCHECKSTATE         | char(1)      |
+| RECCHECKSTATE         | char(1)      |
+| ACCOUNTFLAG           | char(1)      |
+| VALIDATESTATE         | char(1)      |
+| CASHJOURNAL           | char(1)      |
+| ISPRIVATE             | char(1)      |
+| ISACTIVE              | char(1)      |
+| CREATEDBY             | varchar(32)  |
+| CREATEDON             | datetime     |
+| LASTMODIFIEDBY        | varchar(32)  |
+| LASTMODIFIEDON        | datetime     |
+| ROWVERSION            | decimal(4,0) |
+| PERMISSIONBIT         | varchar(32)  |
+| CAPITALUSEID          | varchar(32)  |
+| BUDGETITEMID          | varchar(32)  |
+| CHECKCODE             | varchar(32)  |
+| VALIDATIONDESCRIPTION | varchar(128) |
+| PAYORGID              | varchar(32)  |
+| PAYNAMEID             | varchar(32)  |
+| PAYNAME               | varchar(128) |
+| PAYBANKLOCATIONS      | varchar(128) |
+| PAYBANKACCOUNT        | varchar(64)  |
+| PAYBANKSID            | varchar(32)  |
+| PAYDIRECTBANKCODE     | varchar(32)  |
+| PAYBANKAREAID         | varchar(32)  |
+| PAYBANKAREACODE       | varchar(32)  |
+| PAYBANKAREANAME       | varchar(64)  |
+| RECNAMEID             | varchar(32)  |
+| RECNAME               | varchar(128) |
+| RECBANKLOCATIONS      | varchar(128) |
+| RECBANKACCOUNT        | varchar(64)  |
+| RECBANKSID            | varchar(32)  |
+| RECDIRECTBANKCODE     | varchar(32)  |
+| RECBANKAREAID         | varchar(32)  |
+| RECBANKAREACODE       | varchar(32)  |
+| RECBANKAREANAME       | varchar(64)  |
+| CNAPS                 | varchar(32)  |
+| ABSTRACT              | varchar(128) |
+| DIRECTCURCODE         | varchar(32)  |
+| PURPOSE               | text         |
+| ASKNUMBER             | varchar(32)  |
+| ORIGINNOTE            | varchar(64)  |
+| DIRECTACCESSCODE      | varchar(32)  |
+| COMMANDCODE           | varchar(32)  |
+| CERTTYPE              | varchar(32)  |
+| CERTNUMBER            | varchar(64)  |
+| CREDITCARDSECCODE     | varchar(32)  |
+| CREDITCARDVALIDITY    | datetime     |
+| CARDTYPE              | char(1)      |
+| CHONGHONGREASON       | text         |
+| PAYMADEDATE           | datetime     |
+| PAYINFOCODE           | varchar(32)  |
+| PAYINFO               | text         |
+| ACCOUNTSTATEDATE      | datetime     |
+| ACCOUNTINFO           | varchar(128) |
+| ACCOUNTBATCHNO        | varchar(64)  |
+| REQBATCHNO            | varchar(32)  |
+| PSSELNUM              | varchar(32)  |
+| SPLITNUM              | varchar(32)  |
+| PAYCHECKBATCHNO       | varchar(32)  |
+| RECCHECKBATCHNO       | varchar(32)  |
+| SUMACCOUNTFLAG        | varchar(16)  |
+| OFFICEPURPOSE         | varchar(128) |
+| RECORDSOURCEID        | varchar(32)  |
+| RECORDSOURCEBATNO     | varchar(64)  |
+| GENERATESTATE         | char(1)      |
+| PAYPERSONID           | varchar(32)  |
+| PAYSENTDATE           | datetime     |
+| PAYCHECKDATE          | datetime     |
+| RECCHECKDATE          | datetime     |
+| SOURCENOTECODE        | varchar(32)  |
+| VALIDATEINFO          | text         |
+| memo                  | varchar(512) |
+| DESCRIPTION           | text         |
+| PAYCHECKINFO          | text         |
+| RECCHECKINFO          | text         |
+| CLEARCODE             | varchar(32)  |
+| PAYAPPROVEDDATE       | datetime     |
+| RETURNSTATE           | char(1)      |
+| RECORDSOURCE          | char(1)      |
+| PREPMONEY             | double       |
+| FORCE                 | char(1)      |
+| FASTPAY               | char(1)      |
+| RECEIVEDATE           | datetime     |
+| DUTYCENTERID          | varchar(32)  |
+| CORPACCESSSYSTEMSID   | varchar(32)  |
+| ATTACHMENT1           | varchar(64)  |
+| ATTACHMENT2           | varchar(64)  |
+| ATTACHMENT3           | varchar(64)  |
+| ATTACHMENT4           | varchar(128) |
+| CUSTOMNO              | varchar(32)  |
+| CELLPHONE             | varchar(32)  |
+| BANKSEQNO             | varchar(64)  |
++-----------------------+--------------+
+120 rows in set (0.0026 sec)
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     fields = field_names[i:i+20]
+          ->     table = schema.create_table(table_name)
+          ->     table.add_column("id", "INT").set_auto_increment()
+          ->     for field in fields:
+          ->         column_type = column_info[field]
+          ->         table.add_column(field, column_type)
+          ->     table.create()
+          ->
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+NameError: name 'schema' is not defined
+ MySQL  Py >
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     fields = field_names[i:i+20]
+          ->     table = ats.create_table(table_name)
+          ->     table.add_column("id", "INT").set_auto_increment()
+          ->     for field in fields:
+          ->         column_type = column_info[field]
+          ->         table.add_column(field, column_type)
+          ->     table.create()
+          ->
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+NameError: name 'ats' is not defined. Did you mean: 'abs'?
+ MySQL  Py > schema = "ats"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     fields = field_names[i:i+20]
+          ->     table = schema.create_table(table_name)
+          ->     table.add_column("id", "INT").set_auto_increment()
+          ->     for field in fields:
+          ->         column_type = column_info[field]
+          ->         table.add_column(field, column_type)
+          ->     table.create()
+          ->
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+AttributeError: 'str' object has no attribute 'create_table'
+ MySQL  Py > schema = session.get_schema("ats")
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+AttributeError: 'NoneType' object has no attribute 'get_schema'
+ MySQL  Py > rs.run_sql("show databases;")
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| ats                |
+| mysql              |
+| performance_schema |
+| sys                |
+| testdb             |
++--------------------+
+6 rows in set (0.0010 sec)
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME, COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = 'ats' AND TABLE_NAME = 't_recments'"
+ MySQL  Py > cursor.execute(columns_query)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+NameError: name 'cursor' is not defined
+ MySQL  Py > rs.run_sql(columns_query)
++-----------------------+--------------+
+| COLUMN_NAME           | COLUMN_TYPE  |
++-----------------------+--------------+
+| URID                  | varchar(32)  |
+| ORGID                 | varchar(32)  |
+| NOTECODE              | varchar(32)  |
+| APPORGID              | varchar(32)  |
+| SETTLEMENTMODE        | varchar(32)  |
+| PAYTYPEID             | varchar(32)  |
+| PAYDATE               | datetime     |
+| PAYOBJECTTYPE         | char(1)      |
+| PAYBANKACCOUNTNAME    | text         |
+| RECOBJECTTYPE         | char(1)      |
+| RECORGID              | varchar(32)  |
+| RECBANKACCOUNTNAME    | text         |
+| RECCURRENCYID         | varchar(32)  |
+| RECMONEY              | double       |
+| MONEYWAY              | char(1)      |
+| FASTFLAG              | char(1)      |
+| OTHERREGIONFLAG       | char(1)      |
+| OTHERBANKFLAG         | char(1)      |
+| PAYCURRENCYID         | varchar(32)  |
+| EXCHANGERATE          | double       |
+| PAYMONEY              | double       |
+| DEALTYPE              | decimal(2,0) |
+| DIRECTPAYWAY          | char(1)      |
+| APPROVESTATE          | char(1)      |
+| CANCELSTATE           | char(1)      |
+| PAYSTATE              | char(1)      |
+| CHONGHONGSTATE        | char(1)      |
+| PAYCHECKSTATE         | char(1)      |
+| RECCHECKSTATE         | char(1)      |
+| ACCOUNTFLAG           | char(1)      |
+| VALIDATESTATE         | char(1)      |
+| CASHJOURNAL           | char(1)      |
+| ISPRIVATE             | char(1)      |
+| ISACTIVE              | char(1)      |
+| CREATEDBY             | varchar(32)  |
+| CREATEDON             | datetime     |
+| LASTMODIFIEDBY        | varchar(32)  |
+| LASTMODIFIEDON        | datetime     |
+| ROWVERSION            | decimal(4,0) |
+| PERMISSIONBIT         | varchar(32)  |
+| CAPITALUSEID          | varchar(32)  |
+| BUDGETITEMID          | varchar(32)  |
+| CHECKCODE             | varchar(32)  |
+| VALIDATIONDESCRIPTION | varchar(128) |
+| PAYORGID              | varchar(32)  |
+| PAYNAMEID             | varchar(32)  |
+| PAYNAME               | varchar(128) |
+| PAYBANKLOCATIONS      | varchar(128) |
+| PAYBANKACCOUNT        | varchar(64)  |
+| PAYBANKSID            | varchar(32)  |
+| PAYDIRECTBANKCODE     | varchar(32)  |
+| PAYBANKAREAID         | varchar(32)  |
+| PAYBANKAREACODE       | varchar(32)  |
+| PAYBANKAREANAME       | varchar(64)  |
+| RECNAMEID             | varchar(32)  |
+| RECNAME               | varchar(128) |
+| RECBANKLOCATIONS      | varchar(128) |
+| RECBANKACCOUNT        | varchar(64)  |
+| RECBANKSID            | varchar(32)  |
+| RECDIRECTBANKCODE     | varchar(32)  |
+| RECBANKAREAID         | varchar(32)  |
+| RECBANKAREACODE       | varchar(32)  |
+| RECBANKAREANAME       | varchar(64)  |
+| CNAPS                 | varchar(32)  |
+| ABSTRACT              | varchar(128) |
+| DIRECTCURCODE         | varchar(32)  |
+| PURPOSE               | text         |
+| ASKNUMBER             | varchar(32)  |
+| ORIGINNOTE            | varchar(64)  |
+| DIRECTACCESSCODE      | varchar(32)  |
+| COMMANDCODE           | varchar(32)  |
+| CERTTYPE              | varchar(32)  |
+| CERTNUMBER            | varchar(64)  |
+| CREDITCARDSECCODE     | varchar(32)  |
+| CREDITCARDVALIDITY    | datetime     |
+| CARDTYPE              | char(1)      |
+| CHONGHONGREASON       | text         |
+| PAYMADEDATE           | datetime     |
+| PAYINFOCODE           | varchar(32)  |
+| PAYINFO               | text         |
+| ACCOUNTSTATEDATE      | datetime     |
+| ACCOUNTINFO           | varchar(128) |
+| ACCOUNTBATCHNO        | varchar(64)  |
+| REQBATCHNO            | varchar(32)  |
+| PSSELNUM              | varchar(32)  |
+| SPLITNUM              | varchar(32)  |
+| PAYCHECKBATCHNO       | varchar(32)  |
+| RECCHECKBATCHNO       | varchar(32)  |
+| SUMACCOUNTFLAG        | varchar(16)  |
+| OFFICEPURPOSE         | varchar(128) |
+| RECORDSOURCEID        | varchar(32)  |
+| RECORDSOURCEBATNO     | varchar(64)  |
+| GENERATESTATE         | char(1)      |
+| PAYPERSONID           | varchar(32)  |
+| PAYSENTDATE           | datetime     |
+| PAYCHECKDATE          | datetime     |
+| RECCHECKDATE          | datetime     |
+| SOURCENOTECODE        | varchar(32)  |
+| VALIDATEINFO          | text         |
+| memo                  | varchar(512) |
+| DESCRIPTION           | text         |
+| PAYCHECKINFO          | text         |
+| RECCHECKINFO          | text         |
+| CLEARCODE             | varchar(32)  |
+| PAYAPPROVEDDATE       | datetime     |
+| RETURNSTATE           | char(1)      |
+| RECORDSOURCE          | char(1)      |
+| PREPMONEY             | double       |
+| FORCE                 | char(1)      |
+| FASTPAY               | char(1)      |
+| RECEIVEDATE           | datetime     |
+| DUTYCENTERID          | varchar(32)  |
+| CORPACCESSSYSTEMSID   | varchar(32)  |
+| ATTACHMENT1           | varchar(64)  |
+| ATTACHMENT2           | varchar(64)  |
+| ATTACHMENT3           | varchar(64)  |
+| ATTACHMENT4           | varchar(128) |
+| CUSTOMNO              | varchar(32)  |
+| CELLPHONE             | varchar(32)  |
+| BANKSEQNO             | varchar(64)  |
++-----------------------+--------------+
+120 rows in set (0.0034 sec)
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", {field_name} {column_type}"
+          ->
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 9, in <module>
+mysqlsh.DBError: MySQL Error (1064): ClassicSession.run_sql: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FORCE char(1), FASTPAY char(1), RECEIVEDATE datetime, DUTYCENTERID varchar(32), ' at line 1
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+Query OK, 0 rows affected (0.0194 sec)
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", `{field_name}` {column_type}"
+          ->
+ MySQL  Py >     create_table_sql += ")"
+  File "<string>", line 1
+    create_table_sql += ")"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(create_table_sql)
+  File "<string>", line 1
+    rs.run_sql(create_table_sql)
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py >
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->
+ MySQL  Py >     for field_name in field_names[i:i+20]:
+  File "<string>", line 1
+    for field_name in field_names[i:i+20]:
+IndentationError: unexpected indent
+ MySQL  Py >         column_type = column_info[field_name]
+  File "<string>", line 1
+    column_type = column_info[field_name]
+IndentationError: unexpected indent
+ MySQL  Py >         create_table_sql += f", `{field_name}` {column_type}"
+  File "<string>", line 1
+    create_table_sql += f", `{field_name}` {column_type}"
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py >     create_table_sql += ")"
+  File "<string>", line 1
+    create_table_sql += ")"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(create_table_sql)
+  File "<string>", line 1
+    rs.run_sql(create_table_sql)
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py >
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->
+ MySQL  Py >     for field_name in field_names[i:i+20]:
+  File "<string>", line 1
+    for field_name in field_names[i:i+20]:
+IndentationError: unexpected indent
+ MySQL  Py >         column_type = column_info[field_name]
+  File "<string>", line 1
+    column_type = column_info[field_name]
+IndentationError: unexpected indent
+ MySQL  Py >         create_table_sql += f", `{field_name}` {column_type}"
+  File "<string>", line 1
+    create_table_sql += f", `{field_name}` {column_type}"
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py >     create_table_sql += ")"
+  File "<string>", line 1
+    create_table_sql += ")"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(create_table_sql)
+  File "<string>", line 1
+    rs.run_sql(create_table_sql)
+IndentationError: unexpected indent
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py >
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->
+ MySQL  Py >     for field_name in field_names[i:i+20]:
+  File "<string>", line 1
+    for field_name in field_names[i:i+20]:
+IndentationError: unexpected indent
+ MySQL  Py >         column_type = column_info[field_name]
+  File "<string>", line 1
+    column_type = column_info[field_name]
+IndentationError: unexpected indent
+ MySQL  Py >         create_table_sql += f", `{field_name}` {column_type}"
+  File "<string>", line 1
+    create_table_sql += f", `{field_name}` {column_type}"
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py >     create_table_sql += ")"
+  File "<string>", line 1
+    create_table_sql += ")"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(create_table_sql)
+  File "<string>", line 1
+    rs.run_sql(create_table_sql)
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", {field_name} {column_type}"
+          ->
+ MySQL  Py >     create_table_sql += ")"
+  File "<string>", line 1
+    create_table_sql += ")"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(create_table_sql)
+  File "<string>", line 1
+    rs.run_sql(create_table_sql)
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py >
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->
+ MySQL  Py >     for field_name in field_names[i:i+20]:
+  File "<string>", line 1
+    for field_name in field_names[i:i+20]:
+IndentationError: unexpected indent
+ MySQL  Py >         column_type = column_info[field_name]
+  File "<string>", line 1
+    column_type = column_info[field_name]
+IndentationError: unexpected indent
+ MySQL  Py >         create_table_sql += f", {field_name} {column_type}"
+  File "<string>", line 1
+    create_table_sql += f", {field_name} {column_type}"
+IndentationError: unexpected indent
+ MySQL  Py >
+ MySQL  Py >     create_table_sql += ")"
+  File "<string>", line 1
+    create_table_sql += ")"
+IndentationError: unexpected indent
+ MySQL  Py >     rs.run_sql(create_table_sql)
+  File "<string>", line 1
+    rs.run_sql(create_table_sql)
+IndentationError: unexpected indent
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", {field_name} {column_type}"
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+mysqlsh.DBError: MySQL Error (1050): ClassicSession.run_sql: Table 't_recments_1' already exists
+ MySQL  Py > \q
+Bye!
+[root@dingjia-mysql bin]# ./mysqlsh
+MySQL Shell 8.0.34
+
+Copyright (c) 2016, 2023, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS >
+ MySQL  JS > \py
+Switching to Python mode...
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = 't_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "<string>", line 1, in <dictcomp>
+IndexError: object index out of range
+ MySQL  Py > field_names = list(column_info.keys())
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+NameError: name 'column_info' is not defined
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", {field_name} {column_type}"
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)\q
+          -> ^C
+ MySQL  Py > \q
+Bye!
+[root@dingjia-mysql bin]# ./mysqlsh
+MySQL Shell 8.0.34
+
+Copyright (c) 2016, 2023, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS > \py
+Switching to Python mode...
+ MySQL  Py >
+ MySQL  Py >
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = 't_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", {field_name} {column_type}"
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+mysqlsh.DBError: MySQL Error (1064): ClassicSession.run_sql: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FORCE char(1), FASTPAY char(1), RECEIVEDATE datetime, DUTYCENTERID varchar(32), ' at line 1
+ MySQL  Py > ^C
+ MySQL  Py > \q
+Bye!
+[root@dingjia-mysql bin]# ./mysqlsh
+MySQL Shell 8.0.34
+
+Copyright (c) 2016, 2023, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS > \pt
+Unknown command: '\pt'
+ MySQL  JS > \py
+Switching to Python mode...
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = 't_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > def insert_data(table_name, data):
+          ->     placeholders = ', '.join(['%s'] * len(data))
+          ->     columns = ', '.join(data.keys())
+          ->     insert_query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+          ->     rs.run_sql(insert_query, tuple(data.values()))
+          -> for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", {field_name} {column_type}"
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->     data_to_insert = {}
+          ->     insert_data(table_name, data_to_insert)
+          ->
+Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+mysqlsh.DBError: MySQL Error (1064): ClassicSession.run_sql: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FORCE char(1), FASTPAY char(1), RECEIVEDATE datetime, DUTYCENTERID varchar(32), ' at line 1
+ MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > rs = mysql.get_classic_session(conn1);
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = 't_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", {field_name} {column_type}"
+          ->     create_table_sql += ")"
+          ->     print(create_table_sql)
+          ->
+CREATE TABLE t_recments_1 (id SERIAL PRIMARY KEY, URID varchar(32), ORGID varchar(32), NOTECODE varchar(32), APPORGID varchar(32), SETTLEMENTMODE varchar(32), PAYTYPEID varchar(32), PAYDATE datetime, PAYOBJECTTYPE char(1), PAYBANKACCOUNTNAME text, RECOBJECTTYPE char(1), RECORGID varchar(32), RECBANKACCOUNTNAME text, RECCURRENCYID varchar(32), RECMONEY double, MONEYWAY char(1), FASTFLAG char(1), OTHERREGIONFLAG char(1), OTHERBANKFLAG char(1), PAYCURRENCYID varchar(32), EXCHANGERATE double)
+CREATE TABLE t_recments_2 (id SERIAL PRIMARY KEY, PAYMONEY double, DEALTYPE decimal(2,0), DIRECTPAYWAY char(1), APPROVESTATE char(1), CANCELSTATE char(1), PAYSTATE char(1), CHONGHONGSTATE char(1), PAYCHECKSTATE char(1), RECCHECKSTATE char(1), ACCOUNTFLAG char(1), VALIDATESTATE char(1), CASHJOURNAL char(1), ISPRIVATE char(1), ISACTIVE char(1), CREATEDBY varchar(32), CREATEDON datetime, LASTMODIFIEDBY varchar(32), LASTMODIFIEDON datetime, ROWVERSION decimal(4,0), PERMISSIONBIT varchar(32))
+CREATE TABLE t_recments_3 (id SERIAL PRIMARY KEY, CAPITALUSEID varchar(32), BUDGETITEMID varchar(32), CHECKCODE varchar(32), VALIDATIONDESCRIPTION varchar(128), PAYORGID varchar(32), PAYNAMEID varchar(32), PAYNAME varchar(128), PAYBANKLOCATIONS varchar(128), PAYBANKACCOUNT varchar(64), PAYBANKSID varchar(32), PAYDIRECTBANKCODE varchar(32), PAYBANKAREAID varchar(32), PAYBANKAREACODE varchar(32), PAYBANKAREANAME varchar(64), RECNAMEID varchar(32), RECNAME varchar(128), RECBANKLOCATIONS varchar(128), RECBANKACCOUNT varchar(64), RECBANKSID varchar(32), RECDIRECTBANKCODE varchar(32))
+CREATE TABLE t_recments_4 (id SERIAL PRIMARY KEY, RECBANKAREAID varchar(32), RECBANKAREACODE varchar(32), RECBANKAREANAME varchar(64), CNAPS varchar(32), ABSTRACT varchar(128), DIRECTCURCODE varchar(32), PURPOSE text, ASKNUMBER varchar(32), ORIGINNOTE varchar(64), DIRECTACCESSCODE varchar(32), COMMANDCODE varchar(32), CERTTYPE varchar(32), CERTNUMBER varchar(64), CREDITCARDSECCODE varchar(32), CREDITCARDVALIDITY datetime, CARDTYPE char(1), CHONGHONGREASON text, PAYMADEDATE datetime, PAYINFOCODE varchar(32), PAYINFO text)
+CREATE TABLE t_recments_5 (id SERIAL PRIMARY KEY, ACCOUNTSTATEDATE datetime, ACCOUNTINFO varchar(128), ACCOUNTBATCHNO varchar(64), REQBATCHNO varchar(32), PSSELNUM varchar(32), SPLITNUM varchar(32), PAYCHECKBATCHNO varchar(32), RECCHECKBATCHNO varchar(32), SUMACCOUNTFLAG varchar(16), OFFICEPURPOSE varchar(128), RECORDSOURCEID varchar(32), RECORDSOURCEBATNO varchar(64), GENERATESTATE char(1), PAYPERSONID varchar(32), PAYSENTDATE datetime, PAYCHECKDATE datetime, RECCHECKDATE datetime, SOURCENOTECODE varchar(32), VALIDATEINFO text, memo varchar(512))
+CREATE TABLE t_recments_6 (id SERIAL PRIMARY KEY, DESCRIPTION text, PAYCHECKINFO text, RECCHECKINFO text, CLEARCODE varchar(32), PAYAPPROVEDDATE datetime, RETURNSTATE char(1), RECORDSOURCE char(1), PREPMONEY double, FORCE char(1), FASTPAY char(1), RECEIVEDATE datetime, DUTYCENTERID varchar(32), CORPACCESSSYSTEMSID varchar(32), ATTACHMENT1 varchar(64), ATTACHMENT2 varchar(64), ATTACHMENT3 varchar(64), ATTACHMENT4 varchar(128), CUSTOMNO varchar(32), CELLPHONE varchar(32), BANKSEQNO varchar(64))
+ MySQL  Py > columns_query = "SELECT COLUMN_NAME,COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = 't_recments' AND TABLE_SCHEMA = 'ats'"
+ MySQL  Py > columns_result = rs.run_sql(columns_query)
+ MySQL  Py > all_rows = columns_result.fetch_all()
+ MySQL  Py > column_info = {row[0]: row[1] for row in all_rows}
+ MySQL  Py > field_names = list(column_info.keys())
+ MySQL  Py > def insert_data(table_name, data):
+          ->     placeholders = ', '.join(['%s'] * len(data))
+          ->     columns = ', '.join([f"`{col}`" for col in data.keys()])  # Wrap field names with backticks
+          ->     insert_query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+          ->     rs.run_sql(insert_query, tuple(data.values()))
+          -> for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", `{field_name}` {column_type}"  # Wrap field names with backticks
+          ->     create_table_sql += ")"
+          ->     rs.run_sql(create_table_sql)
+          ->
+          ->     data_to_insert = {}  # Your data here
+          ->     insert_data(table_name, data_to_insert)
+          ->
+ MySQL  Py > for i in range(0, len(field_names), 20):
+          ->     table_name = f"t_recments_{i // 20 + 1}"
+          ->     create_table_sql = f"CREATE TABLE {table_name} (id SERIAL PRIMARY KEY"
+          ->     for field_name in field_names[i:i+20]:
+          ->         column_type = column_info[field_name]
+          ->         create_table_sql += f", `{field_name}` {column_type}"  # Wrap field names with backticks
+          ->     create_table_sql += ")"
+          ->     print(create_table_sql)
+          ->
+CREATE TABLE t_recments_1 (id SERIAL PRIMARY KEY, `URID` varchar(32), `ORGID` varchar(32), `NOTECODE` varchar(32), `APPORGID` varchar(32), `SETTLEMENTMODE` varchar(32), `PAYTYPEID` varchar(32), `PAYDATE` datetime, `PAYOBJECTTYPE` char(1), `PAYBANKACCOUNTNAME` text, `RECOBJECTTYPE` char(1), `RECORGID` varchar(32), `RECBANKACCOUNTNAME` text, `RECCURRENCYID` varchar(32), `RECMONEY` double, `MONEYWAY` char(1), `FASTFLAG` char(1), `OTHERREGIONFLAG` char(1), `OTHERBANKFLAG` char(1), `PAYCURRENCYID` varchar(32), `EXCHANGERATE` double)
+CREATE TABLE t_recments_2 (id SERIAL PRIMARY KEY, `PAYMONEY` double, `DEALTYPE` decimal(2,0), `DIRECTPAYWAY` char(1), `APPROVESTATE` char(1), `CANCELSTATE` char(1), `PAYSTATE` char(1), `CHONGHONGSTATE` char(1), `PAYCHECKSTATE` char(1), `RECCHECKSTATE` char(1), `ACCOUNTFLAG` char(1), `VALIDATESTATE` char(1), `CASHJOURNAL` char(1), `ISPRIVATE` char(1), `ISACTIVE` char(1), `CREATEDBY` varchar(32), `CREATEDON` datetime, `LASTMODIFIEDBY` varchar(32), `LASTMODIFIEDON` datetime, `ROWVERSION` decimal(4,0), `PERMISSIONBIT` varchar(32))
+CREATE TABLE t_recments_3 (id SERIAL PRIMARY KEY, `CAPITALUSEID` varchar(32), `BUDGETITEMID` varchar(32), `CHECKCODE` varchar(32), `VALIDATIONDESCRIPTION` varchar(128), `PAYORGID` varchar(32), `PAYNAMEID` varchar(32), `PAYNAME` varchar(128), `PAYBANKLOCATIONS` varchar(128), `PAYBANKACCOUNT` varchar(64), `PAYBANKSID` varchar(32), `PAYDIRECTBANKCODE` varchar(32), `PAYBANKAREAID` varchar(32), `PAYBANKAREACODE` varchar(32), `PAYBANKAREANAME` varchar(64), `RECNAMEID` varchar(32), `RECNAME` varchar(128), `RECBANKLOCATIONS` varchar(128), `RECBANKACCOUNT` varchar(64), `RECBANKSID` varchar(32), `RECDIRECTBANKCODE` varchar(32))
+CREATE TABLE t_recments_4 (id SERIAL PRIMARY KEY, `RECBANKAREAID` varchar(32), `RECBANKAREACODE` varchar(32), `RECBANKAREANAME` varchar(64), `CNAPS` varchar(32), `ABSTRACT` varchar(128), `DIRECTCURCODE` varchar(32), `PURPOSE` text, `ASKNUMBER` varchar(32), `ORIGINNOTE` varchar(64), `DIRECTACCESSCODE` varchar(32), `COMMANDCODE` varchar(32), `CERTTYPE` varchar(32), `CERTNUMBER` varchar(64), `CREDITCARDSECCODE` varchar(32), `CREDITCARDVALIDITY` datetime, `CARDTYPE` char(1), `CHONGHONGREASON` text, `PAYMADEDATE` datetime, `PAYINFOCODE` varchar(32), `PAYINFO` text)
+CREATE TABLE t_recments_5 (id SERIAL PRIMARY KEY, `ACCOUNTSTATEDATE` datetime, `ACCOUNTINFO` varchar(128), `ACCOUNTBATCHNO` varchar(64), `REQBATCHNO` varchar(32), `PSSELNUM` varchar(32), `SPLITNUM` varchar(32), `PAYCHECKBATCHNO` varchar(32), `RECCHECKBATCHNO` varchar(32), `SUMACCOUNTFLAG` varchar(16), `OFFICEPURPOSE` varchar(128), `RECORDSOURCEID` varchar(32), `RECORDSOURCEBATNO` varchar(64), `GENERATESTATE` char(1), `PAYPERSONID` varchar(32), `PAYSENTDATE` datetime, `PAYCHECKDATE` datetime, `RECCHECKDATE` datetime, `SOURCENOTECODE` varchar(32), `VALIDATEINFO` text, `memo` varchar(512))
+CREATE TABLE t_recments_6 (id SERIAL PRIMARY KEY, `DESCRIPTION` text, `PAYCHECKINFO` text, `RECCHECKINFO` text, `CLEARCODE` varchar(32), `PAYAPPROVEDDATE` datetime, `RETURNSTATE` char(1), `RECORDSOURCE` char(1), `PREPMONEY` double, `FORCE` char(1), `FASTPAY` char(1), `RECEIVEDATE` datetime, `DUTYCENTERID` varchar(32), `CORPACCESSSYSTEMSID` varchar(32), `ATTACHMENT1` varchar(64), `ATTACHMENT2` varchar(64), `ATTACHMENT3` varchar(64), `ATTACHMENT4` varchar(128), `CUSTOMNO` varchar(32), `CELLPHONE` varchar(32), `BANKSEQNO` varchar(64))
+ MySQL  Py >
+Using username "root".
+root@172.18.100.59's password:
+Access denied
+root@172.18.100.59's password:
+Last failed login: Thu May 16 09:35:18 CST 2024 from 192.168.97.91 on ssh:notty
+There was 1 failed login attempt since the last successful login.
+Last login: Wed May 15 14:35:10 2024 from 192.168.97.91

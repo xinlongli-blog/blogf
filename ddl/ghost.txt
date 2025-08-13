@@ -1,0 +1,51 @@
+在主库上创建 _xxx_gho、_xxx_ghc，并修改 _xxx_gho 表结构；从主库上读取二进制日志事件，将变更应用到主库上的 _xxx_gho 表；
+在主库上读源表的数据写入 _xxx_gho 表中；在主库上完成表切换。
+
+默认模式，gh-ost通过从节点找到主节点进行连接：
+在主库上创建 _xxx_gho（和原表表结构一致）、_xxx_ghc（记录变更日志），修改 _xxx_gho 表结构
+从 slave 上读取二进制日志事件，将变更应用到主库上的 _xxx_gho 表；
+在主库上读源表的数据写入 _xxx_gho 表中、主库完成表切换；
+
+
+
+gh-ost \
+--max-load=Threads_running=25 \												-- 当状态超过阈值时，会触发节流 例如：“Threads_running=100，Threads_connected=500”。
+--critical-load=Threads_running=1000 \										-- 临界负载水平 超出会终止
+--chunk-size=1000 \															-- 迁移块的大小
+--throttle-control-replicas="myreplica.1.com,myreplica.2.com" \				-- 检查延迟副本列表					
+--max-lag-millis=1500 \														-- 设置主从延迟的最大阈值 超过值会触发节流
+--user="root" \
+--password='1234' \
+--host='10.10.102.101' \
+--port=3306 \
+--database="icps2" \
+--allow-on-master \															-- 允许在主库上运行操作，最好是在从库运行
+--table="cps_transactions_copy2" \
+--verbose \											-- 可忽略
+--alter="drop index index_transsource" \									-- 变更语句
+--switch-to-rbr \															-- 在迁移期间切换到基于行的复制模式
+--allow-master-master \														-- 允许在主主复制环境中运行迁移操作
+--cut-over=default \								-- 可忽略	              -- 指定迁移的切换方式，默认为 default。
+--exact-rowcount \															-- 在切换期间确保行数的准确性。
+--concurrent-rowcount \														-- 在切换期间并发计算行数。
+--heartbeat-interval-millis=2000 \											-- 设置心跳间隔，以毫秒为单位。
+--default-retries=120 \														-- 操作失败时的默认重试次数。
+--panic-flag-file=/tmp/ghost.panic.flag \									-- 在发生紧急情况时触发的标志文件路径
+--timestamp-old-table \														-- 在迁移期间给旧表添加时间戳列。
+--postpone-cut-over-flag-file=/tmp/ghost.postpone.flag						-- 当文件存在时，迁移将推迟交换表的最后阶段，并将继续同步ghost表，一旦文件被删除，切换就可以开始执行了
+--initially-drop-ghost-table						-- 可忽略                -- 删除_ghc\_gho 相关表
+[--execute]																	-- 使用 --execute ，迁移实际上会复制数据并翻转表。没有它，这是一场 noop 奔跑。
+
+
+1. create new table；
+2. alter new table；
+3. alter end；
+4. create triggers ... ；
+5. copy数据、pt-online-schema-change涉及运行的insert -- <u>insert low_priority ignore into</u>.. 跟ghos不通 pt-online-schema-change多了参数LOW_PRIORITY、参数会导致执行顺序为低级、也就是说会等待其他非LOW_PRIORITY的读写操作完成后才执行，是为了减少锁竞争。个人角度而言可能是走触发器的原因所采用此参数。
+6. copy完成后 会analyz 做优化表操作。
+7. sawpping new table && swapped original
+8. drop 、old table triggers；
+9. successfully altered
+
+
+/usr/local/mysql/bin/mysqldump -h 127.0.0.1 -P 3306 -uroot -p --single-transaction --skip-opt --databases metadb --triggers --routines --events --master-data=2 --delete-master-logs --add-drop-database --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --log-error=/opt/mysqldump_log.log > /opt/mysqldump20240509.sql
