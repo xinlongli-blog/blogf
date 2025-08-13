@@ -319,7 +319,7 @@ $1 = {m_length = 18, m_db_name_length = 7,
       m_name = 0x1f47938 "User lock", m_flags = 0}, {m_key = 121, m_name = 0x1f47948 "Waiting for locking service lock", m_flags = 0}}}
 ```
 
-上述信息可以看出，正在请求test_db库mdl_demo这张表的锁
+综上上述信息可以看出，正在请求test_db库mdl_demo这张表的锁
 
 ## 4	锁等待：
 
