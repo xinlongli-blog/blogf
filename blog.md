@@ -1,6 +1,6 @@
-20220217
+20220217 采集器配置项
 
-#采集器配置项
+
 打开等待事件采集器配置项开关，需要修改配置表中对应的采集器配置项
 ```sql
 update setup_instruments set enabled ='yes',timed='yes' where name like 'wait%';
@@ -22,9 +22,10 @@ mysqldump -h127.0.0.1 -ulixl -p --single-transaction --skip-opt --databases bioi
 MySQL [(none)]> source /root/bioinfo_backup_20220615.sql
 ```
 
-#截取position位置并导出sql
-/usr/local/mysql/bin/mysqlbinlog  --start-position="486" /usr/local/mysql/data/mysql-bin.000138 >/138.sql
+# mysql position
 ```sql
+/usr/local/mysql/bin/mysqlbinlog  --start-position="486" /usr/local/mysql/data/mysql-bin.000138 >/138.sql
+
 mysql -ulixl -p -e "GRANT REPLICATION SLAVE ON *.* TO 'monitor'@'%' IDENTIFIED BY '2P001';"
 alter user 'monitor'@'localhost' identified by '2P001';
 
@@ -35,6 +36,7 @@ start slave
 
 # user expire
 ```sql
+用户有效期
 create user loge@'%' identified by '123456' password expire interval 90 day;
 alter user loge@'%' identified by '123456' password expire interval 90 day;
 
@@ -48,7 +50,8 @@ ALTER USER 'loge'@'%' PASSWORD EXPIRE;
 ALTER USER 'test'@'%' identified BY '123' PASSWORD EXPIRE;
 ```
 
-# 用户重命名
+# user rename
+```sql
 rename user 'chenhh'@'%' to 'zhoujielun'@'%';
 
 create user 'zabbix'@'%' identified by 'zabbix';
@@ -57,10 +60,12 @@ create user 'lixl'@'%' IDENTIFIED BY 'lixl';
 grant all privileges on *.* to lixl@'%' with grant option; 
 revoke shutdown on *.* from 'lixl'@'%';
 FLUSH PRIVILEGES; 
-做生活的高手
-create user 'readonly'@'%' IDENTIFIED BY 'readonly@123';
+```
 
-# with grant option 通过在grant语句的最后使用该子句，就允许被授权的用户把得到的权限继续授给其它用户
+```sql
+create user 'readonly'@'%' IDENTIFIED BY 'readonly@123';
+ 
+with grant option 通过在grant语句的最后使用该子句，就允许被授权的用户把得到的权限继续授给其它用户
 grant select on `evoicecs`.* to readonly@'%' with grant option; 
 FLUSH PRIVILEGES;
 
@@ -71,8 +76,9 @@ FLUSH PRIVILEGES;
 CREATE DATABASE `sign` /*!40100 DEFAULT CHARACTER SET utf8 */
 create database pos_node default charset utf8 collate utf8_general_ci;
 GRANT ALL PRIVILEGES ON `pos_node`.* TO 'us_pos_payment'@'%'
-
-#8.1
+```
+# 用户权限(8.1)
+```sql
 CREATE DATABASE `Test_database` CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_0900_ai_ci';
 
 grant all on lis.* to 'us_lis'@'%';
@@ -183,6 +189,78 @@ FLUSH PRIVILEGES;
 # copy permissions
 GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%'
 
+
+#Add the primary key id to add unsymbolized
+ALTER TABLE pay_detail_copy_1 ADD COLUMN id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+
+alter table _cps_approve_info_del add column t2 varchar(12)
+
+create user repl@'%' identified WITH 'mysql_native_password' by 'P001';
+GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'repl'@'%'; 
+
+stop replica; reset replica;
+
+CHANGE MASTER TO
+  MASTER_HOST='127.0.0.2',
+  MASTER_USER='repl',
+  MASTER_PASSWORD='P001',
+  MASTER_PORT=3308,
+  MASTER_AUTO_POSITION=1;
+
+show replica status\G;
+
+grant
+SELECT HOST,USER FROM mysql.user
+ALTER USER ltest IDENTIFIED WITH caching_sha2_password BY '123';
+CREATE USER 'armoto'@'%' IDENTIFIED WITH 'mysql_native_password' BY 'Passarmoto123';
+ 
+-- 对目标数据库的权限
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES ON `bjfinance`.* TO 'armoto'@'%';
+
+SELECT COUNT(1) FROM llfinanceinterfaceimp
+
+GRANT REPLICATION SLAVE, REPLICATION CLIENT, SUPER ON *.* TO 'armoto'@'%';
+GRANT SELECT ON `bjfinance`.* TO 'armoto'@'%';
+```
+
+
+克隆事件
+```sql
+#plugin_clone https://dev.mysql.com/doc/refman/8.0/en/clone-plugin-remote.html
+
+[mysqld]
+plugin-load-add=mysql_clone.so
+or
+INSTALL PLUGIN clone SONAME 'mysql_clone.so';
+
+select plugin_name,plugin_status from information_schema.plugins where plugin_name like 'clone';
+
+#local clones
+mysql> CREATE USER clone_user@'%' IDENTIFIED by 'password';
+mysql> GRANT BACKUP_ADMIN ON *.* TO 'clone_user';  # BACKUP_ADMIN是MySQL8.0 才有的备份锁的权限
+
+执行本地克隆
+mysql -uclone_user -ppassword -S /tmp/mysql3008.sock
+mysql> CLONE LOCAL DATA DIRECTORY = '/fander/clone_dir';
+
+#Donor
+CREATE USER clone_user@'127.0.0.2' IDENTIFIED by 'P001';
+GRANT BACKUP_ADMIN ON *.* TO 'clone_user'@'127.0.0.2';  # BACKUP_ADMIN是MySQL8.0 才有的备份锁的权限
+#Recipient
+CREATE USER clone_user@'127.0.0.2' IDENTIFIED by 'P001';
+GRANT CLONE_ADMIN ON *.* TO 'clone_user'@'127.0.0.2';
+
+set global clone_valid_donor_list='127.0.0.2:3308' # 将捐赠者 MySQL 服务器实例的主机地址添加到 clone_valid_donor_list 变量设置中
+CLONE INSTANCE FROM clone_user@'127.0.0.2':3308 IDENTIFIED BY 'P001';
+
+SELECT STAGE, STATE, END_TIME FROM performance_schema.clone_progress;	# `克隆流程`
+SELECT STATE FROM performance_schema.clone_status;	# `克隆进度`
+SELECT STATE, ERROR_NO, ERROR_MESSAGE FROM performance_schema.clone_status; # `克隆是否有问题`
+show global status like 'Com_clone';  # `捐赠者` 每次+1，`接受者` 0
+```
+
+online ddl
+```sql
 # pt-table-sync uage
 修复不一致数据 打印主从表信息不一致语句 --execute参数直接修复 生产不建议
 pt-table-sync --replicate=area.checksums h=127.0.0.1,u=lixl,p=lixl h=127.0.0.1,u=lixl,p=lixl --print
@@ -241,78 +319,7 @@ gh-ost \
 
 -- pt-online-schema-change --user=percona --password=percona --host=127.0.0.2 --port=3308 --alter="modify column ROWVERSION decimal(8,2)" D=partition_1,t=ats_choudan_tmp --execute --dry-run --nocheck-replication-filters
 
-#Add the primary key id to add unsymbolized
-ALTER TABLE pay_detail_copy_1 ADD COLUMN id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
-
-alter table _cps_approve_info_del add column t2 varchar(12)
-AS400_to_P20_LifeMir20210913 VRIDER VCNTRS
-AS400-100_216_LifeMir  VRIDER
-AS400-99_11_LifeMir VRIDER
-AS400_DATAJRN-100_216_LifeMir VRIDER
-AS400_to_100_98_LifeMir VRIDER
-AS400_to_99_10_LifeMir VRIDER VCNTRS
-AS400_to_99_13_LifeMir VRIDER VCNTRS
-AS400_to_100_99_LifeMir VCNTRS
-AS400_to_P30_LifeMir20191223 VCNTRS
-
-#plugin_clone https://dev.mysql.com/doc/refman/8.0/en/clone-plugin-remote.html
-
-[mysqld]
-plugin-load-add=mysql_clone.so
-or
-INSTALL PLUGIN clone SONAME 'mysql_clone.so';
-
-select plugin_name,plugin_status from information_schema.plugins where plugin_name like 'clone';
-
-#local clones
-mysql> CREATE USER clone_user@'%' IDENTIFIED by 'password';
-mysql> GRANT BACKUP_ADMIN ON *.* TO 'clone_user';  # BACKUP_ADMIN是MySQL8.0 才有的备份锁的权限
-
-执行本地克隆
-mysql -uclone_user -ppassword -S /tmp/mysql3008.sock
-mysql> CLONE LOCAL DATA DIRECTORY = '/fander/clone_dir';
-
-#Donor
-CREATE USER clone_user@'127.0.0.2' IDENTIFIED by 'P001';
-GRANT BACKUP_ADMIN ON *.* TO 'clone_user'@'127.0.0.2';  # BACKUP_ADMIN是MySQL8.0 才有的备份锁的权限
-#Recipient
-CREATE USER clone_user@'127.0.0.2' IDENTIFIED by 'P001';
-GRANT CLONE_ADMIN ON *.* TO 'clone_user'@'127.0.0.2';
-
-set global clone_valid_donor_list='127.0.0.2:3308' # 将捐赠者 MySQL 服务器实例的主机地址添加到 clone_valid_donor_list 变量设置中
-CLONE INSTANCE FROM clone_user@'127.0.0.2':3308 IDENTIFIED BY 'P001';
-
-SELECT STAGE, STATE, END_TIME FROM performance_schema.clone_progress;	# `克隆流程`
-SELECT STATE FROM performance_schema.clone_status;	# `克隆进度`
-SELECT STATE, ERROR_NO, ERROR_MESSAGE FROM performance_schema.clone_status; # `克隆是否有问题`
-show global status like 'Com_clone';  # `捐赠者` 每次+1，`接受者` 0
-
-create user repl@'%' identified WITH 'mysql_native_password' by 'P001';
-GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'repl'@'%'; 
-
-stop replica; reset replica;
-
-CHANGE MASTER TO
-  MASTER_HOST='127.0.0.2',
-  MASTER_USER='repl',
-  MASTER_PASSWORD='P001',
-  MASTER_PORT=3308,
-  MASTER_AUTO_POSITION=1;
-
-show replica status\G;
-
-grant
-SELECT HOST,USER FROM mysql.user
-ALTER USER ltest IDENTIFIED WITH caching_sha2_password BY '123';
-CREATE USER 'armoto'@'%' IDENTIFIED WITH 'mysql_native_password' BY 'Passarmoto123';
- 
--- 对目标数据库的权限
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES ON `bjfinance`.* TO 'armoto'@'%';
-
-SELECT COUNT(1) FROM llfinanceinterfaceimp
-
-GRANT REPLICATION SLAVE, REPLICATION CLIENT, SUPER ON *.* TO 'armoto'@'%';
-GRANT SELECT ON `bjfinance`.* TO 'armoto'@'%';
+```
 
 #mysql8.0.26 install
 #初始化
