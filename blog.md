@@ -321,8 +321,23 @@ gh-ost \
 
 ```
 
-#mysql8.0.26 install
-#初始化
+pt
+```sql
+归档不删除
+pt-archiver --source u=root,p=Cmbjx3ccwtn9,h=192.168.100.165,P=3306,D=gds_maap,t=t_message_send  \
+--dest u=root,p=Cmbjx3ccwtn9,h=192.168.100.165,P=3306,D=gds_maap,t=t_message_send_2024 --where "TransTime < '2025-01-01 00:00:00'" \
+--progress=2000 --statistics --bulk-insert --bulk-delete --txn-size=2000 --limit=2000 --no-delete \
+--no-check-charset --skip-foreign-key-checks --dry-run
+
+删除
+pt-archiver --source u=root,p=123,h=192.168.100.165,P=3306,D=gds_maap,t=t_message_send --where "TransTime < '2025-01-01 00:00:00'" \
+  --progress 2000 --statistics --bulk-delete --txn-size 2000 --limit 2000 --purge --no-check-charset --skip-foreign-key-checks --dry-run
+```
+
+
+mysql8.0.26 install
+```sql
+初始化
 /opt/mysql-8.0.26/bin/mysqld --defaults-file=/etc/my.cnf.d/my.cnf --initialize --user=mysql
 
 -----------------------------------------------
@@ -375,35 +390,20 @@ $bindir/mysqld_safe /--defaults-file="$conf" 增加 / --datadir="$datadir" --pid
 
 #启动mysql
 support-files/mysql.server start	 
-	
-#月度维护(服务器密码
 
-#20220218
+```sql
 
+20220218
 docker stop $(docker ps -a | awk '{ print $1}' | tail -n +2)
 
-mysql架构体系
-mysql向外提供交互接口--connectors
-
-
-#阿里云密码
+阿里云密码
 121.40.213.220
 root
 latency@1
 
 
-insert into handler_table values(3, '张三');
-insert into handler_table values(4, '李四');
-insert into handler_table values(5, '王五');
-insert into handler_table values(1, '刘一');
-insert into handler_table values(2, '陈二');
-
-Create Table: CREATE TABLE `handler_table` (
-  `id` int(11) DEFAULT NULL,
-  `name` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
-
-# GTID POSITION
+GTID POSITION
+```sql
 change master to master_host='10.67.33.136' ,master_user='repl',master_password='repl',master_auto_position=1;
 
 change master to master_host='127.0.0.2' ,master_user='repl',master_password='2P001',master_auto_position=1;
@@ -466,15 +466,16 @@ laster DROP database t
 'mysql-bin.000001', 180, 'No'
 'mysql-bin.000002', 6952, 'No'
 
-#如果记录gtid 导入数据会报错、需清空该参数GLOBAL.GTID_EXECUTED 需reset master即可。
+```
+
+如果记录gtid 导入数据会报错、需清空该参数GLOBAL.GTID_EXECUTED 需reset master即可。
 ERROR 3546 (HY000) at line 26: @@GLOBAL.GTID_PURGED cannot be changed: the added gtid set must not overlap with @@GLOBAL.GTID_EXECUTED
 SELECT @@GLOBAL.GTID_EXECUTED
 
 reset master;
 
 
-
-#mysqldump些参数说明:
+mysqldump些参数说明:
 --single-transaction
 	single-transaction参数的作用，设置事务的隔离级别为可重复读，即REPEATABLE READ，这样能保证在一个事务中所有相同的查询读取到同样的数据，也就大概保证了在dump期间，如果其他innodb引擎的线程修改了表的数据并提交，对该dump线程的数据并无影响，在这期间不会锁表。
 
@@ -647,10 +648,10 @@ Innodb_rows_inserted
 Innodb_rows_updated
 innodb表中更新的行数。单位是行
 
-#查看脏页数量
+查看脏页数量
 mysqladmin ext| grep dirty
 
-#mysql监控指标
+mysql监控指标
 QPS
 TPS
 并发数
@@ -690,34 +691,34 @@ relay-log = /data/mysql-3306/binlog/relay-bin
 relay-log-index = /data/mysql-3306/binlog/relay-bin.index
 max_relay_log_size = 1024M
 
-#audit
-#server_audit_events='QUERY_DML_NO_SELECT'
-#server_audit_logging=on
-#server_audit_file_path =/usr/local/mysql/data/
-#server_audit_file_rotate_size=1G
-#server_audit_file_rotations=4
-#server_audit_file_rotate_now=ON
-#server_audit_incl_users=audit,lixl
+audit
+server_audit_events='QUERY_DML_NO_SELECT'
+server_audit_logging=on
+server_audit_file_path =/usr/local/mysql/data/
+server_audit_file_rotate_size=1G
+server_audit_file_rotations=4
+server_audit_file_rotate_now=ON
+server_audit_incl_users=audit,lixl
 
-#innodb_lock_wait_timeout =
-#innodb_log_files_in_group = 3
-#innodb_thread_concurrency = 0
-#innodb_purge_threads = 1
+innodb_lock_wait_timeout =
+innodb_log_files_in_group = 3
+innodb_thread_concurrency = 0
+innodb_purge_threads = 1
 innodb_log_file_size=16M
 innodb_undo_log_truncate=1
 gtid-mode=on
 enforce-gtid-consistency=true
 log-slave-updates=1
 
-#slave-------------------------------------------------
-#master_info_repostitory=table
-#slave_parallel_workers=16
-#slave-parallel-type=LOGICAL_CLOCK
-#slave_pending_jobs_size_max = 2147483648
-#slave_preserve_commit_order=1
-#relay_log_info_repository=TABLE
-#relay_log_recovery=ON
-#general_log=1
+slave-------------------------------------------------
+master_info_repostitory=table
+slave_parallel_workers=16
+slave-parallel-type=LOGICAL_CLOCK
+slave_pending_jobs_size_max = 2147483648
+slave_preserve_commit_order=1
+relay_log_info_repository=TABLE
+relay_log_recovery=ON
+general_log=1
 join_buffer_size=256
 sort_buffer_size=2M
 key_buffer_size = 384M
@@ -728,10 +729,6 @@ max_allowed_packet = 20M
 binlog_cache_size=4M
 tmp_table_size = 256M
 max_heap_table_size = 256M
-
-3月2号点检：
-shsqlp30 bjh_job2作业报错，已邮件告知宋老师；
-其他服务，数据库作业，AR,Zabbix,鼎甲备份，均显示正常；
 
 
 ./home/lixl/soft/percona-xtrabackup-2.4.21-Linux-x86_64.glibc2.12/bin/innobackupex
@@ -752,10 +749,9 @@ export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
 export PATH=${JAVA_HOME}/bin:$PATH
 
 
+ShardingSphere-Proxy 
 
-ShardingSphere-Proxy > 启动手册 > 使用二进制发布包
-
-
+```sql
 authentication:
 #username: root
 #password: root
@@ -773,86 +769,6 @@ props:
  executor-size: 16#Infinite by default.
  proxy-frontend-flush-threshold: 128#The default value is 128.
  
- zabbix
- 日常点检 1.zabbix 监控linux基本参数 cpu 内存 io等。监控mysql qps tps。主从状态。主从延迟pt。检测服务是否正常。2.鼎佳备份3.日常点检，检测服务数据库状态 并发送企业微信。一天三次。
- dynatrace
- 快速定位应用系统性能故障。通过对应用系统各种组件（数据库、中间件）的监测，迅速定位系统故障，可以细化到代码级故障。
- shardingsphere
- 读写分离 分库分表
- proxysql mycat replication-manager保障HA
- mha mgr架构
- 
- keepalived
- VIP转移
- PXC架构
- 
- xtrabackup
- 备份
- pt-heartbeat
- pt工具：检测主从数据一致性、在线修改表结构、检测主从延迟、修复数据不一致问题
- 
- 诊断mysql参数指标
- mysql
- mssql
- pgsql
- mariadb
- redis
- mongodb
- 
- ansible
- 批量部署工具
- 
- --删除主键
-(1)如果主键id不是自动递增
-Alter table ci drop primary key;--删除主建
-
-(2)如果主键id是自动递增
-Alter table ci change id id int(10);--删除自增长
-Alter table ci drop primary key;--删除主建
-
---添加主键
-(1)如果主键id不是自动递增
-Alter table ci add primary key(id);
-
-(2)如果主键id是自动递增
-Alter table ci add primary key(id);
-Alter table ci change id id int(10) unsigned not null auto_increment;
-
-扩展知识：
---添加字段并设置主键
-ALTER TABLE tabelname ADD new_field_id int(5) unsigned default 0 not null auto_increment ,ADD primary key (new_field_id);
---加主关键字的索引
-ALTER TABLE tablename ADD primary key(id);
---加索引  
-ALTER TABLE tablename CHANGE depno depno int(5) not null;
-ALTER TABLE tablename ADD INDEX 索引名 (字段名1[，字段名2 …]);
-ALTER TABLE tablename ADD INDEX emp_name (COLUMNS_name);
---加唯一限制条件的索引
-ALTER TABLE tablename ADD UNIQUE emp_name2(cardnumber);
---删除某个索引
-ALTER TABLE tablename DROP INDEX emp_name;
-
-alter table LCCustomerReturnCall drop index IDX_POLICY_NO
- 
---增加字段：
-ALTER TABLE table_name ADD field_name field_type;
---删除字段
-ALTER TABLE table_name DROP field_name;
---重命名列
-ALTER TABLE table_name CHANGE field_name1 field_name2 integer;
---调整字段顺序 
-ALTER TABLE `users` CHANGE `user_password` `user_password` varchar( 20 ) NOT NULL AFTER user_name;
---改变列的类型
-ALTER TABLE table_name CHANGE field_name field_name bigint not null;
-ALTER TABLE infos CHANGE list list tinyint not null default '0';
---修改原字段名称及类型：   www.2cto.com  
-ALTER TABLE table_name CHANGE old_field_name new_field_name field_type;
---重命名表
-ALTER TABLE table_name rename new_table_name;
---级联更新 和 删除(红色部分,不区分大小写 )
-DROP TABLE IF EXISTS `mail_model`;create TABLE mail_model(id varchar(50) primary key not null ,mail_filename varchar(200),content varchar(2000))ENGINE=InnoDB DEFAULT CHARSET=gbk;
-DROP TABLE IF EXISTS `mail_model_extend`;create TABLE mail_model_extend(id int(6) auto_increment not null primary key,rid varchar(50) not null,content varchar(2000),INDEX (RID),FOREIGN KEY (RID) REFERENCES mail_model(ID) ON DELETE CASCADE ON UPDATE CASCADE)ENGINE=InnoDB DEFAULT CHARSET=gbk;
-
 
 [mysqld]
 basedir=/data/mysql_basedir/
@@ -867,12 +783,7 @@ pid-file=/data/mysql-3306/data
 
 !includedir /etc/my.cnf.d
 
-/usr/bin/
-/etc/init.d/
 
-
-
-echo "test" | mail -s "KEEPALIVED故障进行转移" 1403687948@qq.com
 
 docker inspect pmm-server_data
 [
@@ -891,10 +802,9 @@ docker inspect pmm-server_data
     }
 ]
 
+```
 
 /root/mysqld_exporter/mysqld_exporter --web.listen-address=0.0.0.0:9104 --config.my-cnf /etc/my.cnf --collect.slave_status --collect.slave_hosts --log.level=error --collect.info_schema.processlist --collect.info_schema.innodb_metrics --collect.info_schema.innodb_tablespaces --collect.info_schema.innodb_cmp --collect.info_schema.innodb_cmpmem
-
-
 
 firewall-cmd --zone=public --add-port=9093/tcp --permanent
 firewall-cmd --reload
@@ -938,8 +848,8 @@ Description=node_exporter
 User=root
 ExecStart=/root/node_exporter/node_exporter --log.level=error
 ExecStop=/usr/bin/killall node_exporter
-#MemoryLimit=300M#限制内存使用最多300M
-#CPUQuota=100%#限制CPU使用最多一个核
+MemoryLimit=300M#限制内存使用最多300M
+ CPUQuota=100%#限制CPU使用最多一个核
 
 [Install]
 WantedBy=default.target
@@ -949,11 +859,11 @@ WantedBy=default.target
 --mysqld_exporter.services
 [Unit]
 Description=mysqld_exporter
-#After=network.target
+-#After=network.target
 [Service]
 Type=simple
 User=root
-#Environment=DATA_SOURCE_NAME=lixl:lixl@(localhost:3306)/
+-#Environment=DATA_SOURCE_NAME=lixl:lixl@(localhost:3306)/
 ExecStart=/usr/local/mysqld_exporter/mysqld_exporter --config.my-cnf=/etc/my.cnf
 Restart=on-failure
 [Install]
@@ -963,126 +873,8 @@ WantedBy=default.target
 /usr/local/mysqld_exporter/mysqld_exporter --config.my-cnf=/etc/my.cnf
 
 
-
-#!/bin/bash
-
-echo -e "\033[32m *************** 环境验证-START *************** \033[0m"
-#验证参数
-if [ $#-ne 5 ];then
-  echo -e "\033[41;37m 参数应为5个 \033[0m"
-  exit 9
-fi
-#接收参数
-FIRST=$1
-SECOND=$2
-FILE=$3
-APP=$4
-WORKSPACE=$5
-#设置常量
-UnzipDir="${WORKSPACE}/${APP}"
-TmpPublishFile="${WORKSPACE}/tmp_publish.txt"
-PublishFile="${WORKSPACE}/publish.txt"
-#验证sftp发布包
-if [ "${APP}" = "Midplat" ];then
-        if [ "${FILE}" -eq "1" ];then
-    APP_FULL_NAME="${APP}.zip"
-  else
-    APP_FULL_NAME="${APP}-${FILE}.zip"
-  fi
-  APP_PUBLISH_NAME="${APP}.zip"
-else
-  echo -e "\033[41;37m 参数不正确 ${FIRST} ${SECOND} ${FILE} ${APP} ${WORKSPACE} \033[0m"
-  exit 9
-fi
-FILE_PATH="/data/sftp/midplat/${FIRST}/incr/${SECOND}/${APP_FULL_NAME}"
-if [ ! -f "${FILE_PATH}" ];then
-  echo -e "\033[41;37m 发布包不存在 ${FILE_PATH} \033[0m"
-  exit 9
-fi
-echo "发布包存在 "${FILE_PATH}
-echo -e "\033[32m *************** 环境验证-END *************** \033[0m"
-echo -e "\033[32m *************** 解压发布包-START *************** \033[0m"
-#解压sftp发布包到jenkins工作目录
-unzip ${FILE_PATH} -d ${WORKSPACE} > /dev/null 2>&1
-if [ ! -d "${UnzipDir}" ];then
-  echo "发布包解压失败 ${FILE_PATH} ---> ${WORKSPACE}"
-  exit 9
-fi
-echo "发布包解压成功 ${FILE_PATH} ---> ${WORKSPACE}"
-echo -e "\033[32m *************** 解压发布包-END *************** \033[0m"
-echo -e "\033[32m *************** 验证发布目录-START *************** \033[0m"
-dir_size=$(du -s ${UnzipDir} | awk '{print $1}')
-if [ "${dir_size}" -eq "0" ];then
-        echo -e "\033[41;37m 目录下没有文件 ${FILE_PATH} \033[0m"
-        tree -C
-  exit 9
-fi
-echo "发布目录结构如下："
-tree -C ${UnzipDir}
-#将发布文件的绝对路径写入临时文件
-tree -f -i ${UnzipDir} > ${TmpPublishFile}
-#格式化文件
-TotalLine=`cat ${TmpPublishFile} | wc -l`
-sed -i $((${TotalLine}-1)),${TotalLine}d ${TmpPublishFile}
-#去除文件夹
-TopLine=`head -n 1 ${TmpPublishFile}`
-for line in `cat ${TmpPublishFile}`
-do
-        if [ -f ${line} ];then
-                substr=${line:$((${#TopLine}+1))}
-                echo ${substr//\//\\} >> ${PublishFile}
-        fi
-done
-#删除临时文件
-rm -f ${TmpPublishFile} > /dev/null 2>&1
-echo -e "\033[32m *************** 验证发布目录-END *************** \033[0m"
-echo -e "\033[32m *************** 记录版本号-START *************** \033[0m"
-echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S") ${APP} ${FILE_PATH}" >> $(cd `dirname $0`; pwd)/version.txt
-echo -e "\033[32m *************** 记录版本号-END *************** \033[0m"
-exit 0
-
-P@ssword1f
-
-20220329212909
-20220329212941
-
-27869164:#             '0020220329212909',
-27869177:#  @1=20220329212909 /* DECIMAL(20,0) meta=5120 nullable=0 is_null=0 */
-27869211:#             '0020220329212909',
-27869224:#  @1=20220329212909 /* DECIMAL(20,0) meta=5120 nullable=0 is_null=0 */
-27869258:#             '0020220329212909',
-27869271:#  @1=20220329212909 /* DECIMAL(20,0) meta=5120 nullable=0 is_null=0 */
-28530559:#  @1=20220329212909 /* DECIMAL(20,0) meta=5120 nullable=0 is_null=0 */
-28530571:#  @1=20220329212909 /* DECIMAL(20,0) meta=5120 nullable=0 is_null=0 */
-
-27880788:#             '0020220329212941',
-27880801:#  @1=20220329212941 /* DECIMAL(20,0) meta=5120 nullable=0 is_null=0 */
-
-
------交接问题相关汇总
-1.SQLServer修改表结构 AR数据同步相关（新建表，新建字段带default值 ，增减同步表，数据同问题调查 等等）
-2.周末清理团险日志 --操作 还有类似清理日志的服务器吗
-3.MQ重放报文问题、MQ类似问题 --中间件厂商负责
-4.dynatrace安装问题 --操作文档
-5.智能核保数据库地址、发布
-6.sqlserver备份脚本 备份疑惑 --BACKUP LOG [LifeCIRC] To disk='nul'
-7.sqlserver数据迁移注意事项
-8.监控告警服务器 --不清楚的服务器请教丁杰？？
-9.127.0.0.1 自动清理脚本
-10.企业微信管理后台 --登陆操作 添加用户显示报警
-11.jenkins 发布失败--直接回滚吗
-12.企业微信群 输出警告信息 --详情
-13.云上数据库巡检 是否包含在zabbix上
-14.ar 邮件设置  --详情问供应商
-
-127.0.0.1_shcredit-app1 负责人
-127.0.0.1_shPayDB-主 负责人 是否为我维护
-127.0.0.1_shPayDB-从
-127.0.0.1 mysql 负责人 是否为我维护
-
-
 --架构升级
-172.28.249.216
+127.0.0.3
 select count(*) from recr_notice;
 +----------+
 | count(*) |
@@ -1103,7 +895,7 @@ select count(*) from recr_user_info;
 +----------+
 
 
-172.28.250.82
+127.0.0.3
 select count(*) from outer_manage;
 +----------+
 | count(*) |
@@ -1111,7 +903,7 @@ select count(*) from outer_manage;
 |   312596 |
 +----------+
 
-172.28.250.145
+127.0.0.3
 SELECT table_name,table_rows FROM information_schema.tables WHERE TABLE_SCHEMA ='csactivity' ORDER BY table_rows DESC limit 3;
 +-------------------+------------+
 | table_name        | table_rows |
@@ -1121,7 +913,7 @@ SELECT table_name,table_rows FROM information_schema.tables WHERE TABLE_SCHEMA =
 | laagent           |     252840 |
 +-------------------+------------+
 
-172.28.250.156
+127.0.0.3
 mysql> SELECT table_name,table_rows FROM information_schema.tables WHERE TABLE_SCHEMA ='ApolloConfigDB' ORDER BY table_rows DESC limit 3;           
 +----------------+------------+
 | table_name     | table_rows |
@@ -1168,167 +960,9 @@ kill -9 $(ps -ef|grep docker | awk '{ print $2}' | tail -n +2)
 
 kill -9 $(ps -ef|grep awx | awk '{ print $2}' | tail -n +2)
 
-! Configuration File for keepalived
 
-global_defs {
-   router_id GDS-PRO-qianyue-db2
-}
-
-vrrp_script mysqlcheck {
-    script "/usr/bin/sh /data/keepalived/check/mysql_check.sh"
-    interval 5
-}
-
-vrrp_instance QIANYUE_VIP {
-    state BACKUP
-    interface ens160
-    virtual_router_id 55
-    priority 90
-    advert_int 1
-    authentication {
-        auth_type PASS
-        auth_pass 1111
-    }
-    virtual_ipaddress {
-        127.0.0.1
-    }
-    track_script {
-        mysqlcheck
-    }
-    notify_master "/usr/bin/sh data/keepalived/backup_status_switch.sh master"
-    notify_backup "/usr/bin/sh /data/keepalived/backup_status_switch.sh backup"
-    notify_fault "/usr/bin/sh /data/keepalived/backup_status_switch.sh fault"
-    notify_stop "/usr/bin/sh /data/keepalived/backup_status_switch.sh stop"
-}
-
--------------------------------------------------------------
-#!/bin/bash
-#截取主从同步position
-#set home
-WORKHOME="/data/keepalived/"
-LOGFILE=${WORKHOME}"log/switch.log"
-
-#set const
-USERNAME="replic_oper"
-PASSWORD="replic_oper@123"
-
-#write log
-echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  switch: $1" >> ${LOGFILE}
-
-if [ $1 == 'master' ];then
-    for loop in 1 2
-    do
-        status=$(/opt/mysql-3306/bin/mysql -hlocalhost -u${USERNAME} -p${PASSWORD} -e "show slave status\G" | egrep 'Master_Log_File|Read_Master_Log_Pos|Relay_Master_Log_File|Exec_Master_Log_Pos' | awk '{print $2}')
-        i=0
-        for a in ${status}
-        do
-            if [ $i -eq 0 ];then
-                Master_Log_File=$a
-            elif [ $i -eq 1 ];then
-                Read_Master_Log_Pos=$a
-            elif [ $i -eq 2 ];then
-                Relay_Master_Log_File=$a
-            elif [ $i -eq 3 ];then
-                Exec_Master_Log_Pos=$a
-            fi
-            let i+=1
-        done
-        if [ $loop == "2" ];then
-            /opt/mysql-3306/bin/mysqladmin -hlocalhost -u${USERNAME} -p${PASSWORD} stop-slave >/dev/null 2>&1
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  Master_Log_File: ${Master_Log_File}" >> ${LOGFILE}
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  Relay_Master_Log_File: ${Relay_Master_Log_File}" >> ${LOGFILE}
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  Read_Master_Log_Pos: ${Read_Master_Log_Pos}" >> ${LOGFILE}
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  Exec_Master_Log_Pos: ${Exec_Master_Log_Pos}" >> ${LOGFILE}
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  stop slave" >> ${LOGFILE}
-            break
-        fi
-        if [ ${Master_Log_File} == ${Relay_Master_Log_File} ] && [ ${Read_Master_Log_Pos} -eq ${Exec_Master_Log_Pos} ];then
-            /opt/mysql-3306/bin/mysqladmin -hlocalhost -u${USERNAME} -p${PASSWORD} stop-slave >/dev/null 2>&1
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  Master_Log_File: ${Master_Log_File}" >> ${LOGFILE}
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  Relay_Master_Log_File: ${Relay_Master_Log_File}" >> ${LOGFILE}
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  Read_Master_Log_Pos: ${Read_Master_Log_Pos}" >> ${LOGFILE}
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  Exec_Master_Log_Pos: ${Exec_Master_Log_Pos}" >> ${LOGFILE}
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  stop slave" >> ${LOGFILE}
-            break
-        else
-            sleep 30
-            echo "$(date "+%Y-%m-%d") $(date "+%H:%M:%S")  sleep 30S" >> ${LOGFILE}
-    fi
-    done
-fi
-exit 0
-----------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------
---keepalived.conf
-
-! Configuration File for keepalived
-
-global_defs {
-    router_id GDS-PRO-qianyue-db1
-}
-
-vrrp_script mysqlcheck {
-    script "/usr/bin/sh /data/keepalived/check/mysql_check.sh"
-    interval 5
-}
-
-vrrp_instance QIANYUE_VIP {
-    state BACKUP
-    interface ens160
-    virtual_router_id 55
-    priority 100
-    advert_int 1
-    nopreempt
-    authentication {
-        auth_type PASS
-        auth_pass 1111
-    }
-    virtual_ipaddress {
-        127.0.0.1
-    }
-    track_script {
-        mysqlcheck
-    }
-    notify_master "/usr/bin/sh /data/keepalived/master_status_switch.sh master"
-    notify_backup "/usr/bin/sh /data/keepalived/master_status_switch.sh backup"
-    notify_fault "/usr/bin/sh /data/keepalived/master_status_switch.sh fault"
-    notify_stop "/usr/bin/sh /data/keepalived/master_status_switch.sh stop"
-}
-
-------------------------------------------------------------------------------------
  select * from sys.dm_tran_session_transactions; --查看当前运行的事务
  
-#接收者邮箱，多个以空格分隔
-contact=(1403687948@qq.com)
-#本机ip
-HOST_IP=127.0.0.1
-notify() {
-#邮件主题
-    mailsubject="KEEPALIVED故障进行转移,$HOST_IP keepalived to be $1"
-#邮件正文
-    mailbody="$(date +'%F %T'): vrrp transition, $HOST_IP keepalived changed to be $1"
-    for receiver in ${contact[*]}
-    do
-   #发送邮件
-        echo ""$(date +'%F %T'): vrrp transition,127.0.0.1 keepalived changed" | mail -r 127.0.0.1 -s "KEEPALIVED故障进行转移" $receiver
-    done
-}
-case $1 in
-master)
-    notify master
-    ;;
-backup)
-    notify backup
-    ;;
-fault)
-    notify fault
-    ;;
-*)
-    echo "Usage:{master|backup|fault}"
-    exit 1
-    ;;
-esac
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --server-address=127.0.0.1 --server-insecure-tls --server-username=admin --server-password=admin
 pmm-admin config --server-insecure-tls --server-url=https://admin:admin@127.0.0.1:443
@@ -1340,11 +974,9 @@ pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml
 pmm-admin config --server-insecure-tls --server-url=https://admin:admin@127.0.0.1:443
 
 
-#赢时胜每月脚本
-update CS_SUN set FBWB = round(FBWB,2) where fywdate >= '20220601' and fywdate < '20220701';
-update cs_sun  set FT7 = '000'  where FT7 = '0000'  and fywdate >= '20220601' and fywdate < '20220701';
 
-#sysbench压测OLTP
+sysbench压测OLTP
+```sql
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #准备数据
 sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=lixl --mysql-password=lixl --mysql-db=sysbench --mysql-storage-engine=innodb --tables=5 --table-size=100000000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off prepare
@@ -1370,89 +1002,12 @@ sysbench --db-driver=mysql --mysql-host=127.0.0.2 --mysql-port=3308 --mysql-user
 172.17.0.2
 
 show variables where variable_name in ('innodb_buffer_pool_size','innodb_log_buffer_size','innodb_additional_mem_pool_size','key_buffer_size','query_cache_size');
-
-#mycat
- <readHost host="hostS1" url="jdbc:mysql://127.0.0.1:3306" user="lixl" password="lixl" />
- TESTDB
- 
- ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+```
 
 
-https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=wwc94cbe14046ce7f7&corpsecret=m7zBNoy7Heot8Kxl_5X2abWbVP715hELRI3gEtXeDLA
-
-#!/bin/bash
-
-CropID='wwc94cbe14046ce7f7'
-Secret='m7zBNoy7Heot8Kxl_5X2abWbVP715hELRI3gEtXeDLA'
-GURL="https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=$CropID&corpsecret=$Secret"
-Gtoken=$(/usr/bin/curl -s -G $GURL | awk -F\" '{print $4}')
-
-PURL="https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=$Gtoken"
-
-function body() {
-local int AppID=1
-local UserID=$1
-local PartyID=2
-local Msg=$(echo "$@" | cut -d" " -f3-)
-printf '{\n'
-printf '\t"touser": "'"$UserID"\"",\n"
-printf '\t"toparty": "'"$PartyID"\"",\n"
-printf '\t"msgtype": "text",\n'
-printf '\t"agentid": "'" $AppID "\"",\n"
-printf '\t"text": {\n'
-printf '\t\t"content": "'"$Msg"\""\n"
-printf '\t},\n'
-printf '\t"safe":"0"\n'
-printf '}\n'
-}
-/usr/bin/curl --data-ascii "$(body $1 $2 $3)" $PURL
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#!/bin/bash
-#监控mysql服务 企业微信提醒
-NAME=mysql
-count=$(netstat -ano | grep ":::3306" | grep "LISTEN" | wc -l)
-if [ ${count} -eq 0 ];then
-  echo "$(date +'%F %T'): mysql is fail,127.0.0.1" | mail -r 127.0.0.1 -s "mysql DOWN!!!" 1403687948@qq.com
-  exit 9
- else
-  echo "$(date +'%F %T'): mysql is running"
-fi
-exit 0
-
-#!/bin/bash
-count=$(netstat -ano | grep ":::3306" | grep "LISTEN" | wc -l)
- if [${count} -ne 0 ];then
-  exit 9
- else
-  AgentID="1000016"
-  CropID="wxb6e82c5ccefc0733"
-  Secret="Ddm7YI-g8yd-Pa3etoT0gubaELxRQ7B0wu6eWdiJV5A"
-  GURL="https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=$CropID&corpsecret=$Secret"
-  Gtoken=$(/usr/bin/curl -s -G $GURL | awk -F \" '{print $10}')
-  count=$(netstat -ano | grep ":::3306" | grep "LISTEN" | wc -l)
-  DATE=`date +'%F %T'`
-  SERVER=`/usr/sbin/ifconfig ens160 | grep 'inet' | awk '{print $2}'|head -n 1`
-  body='{
-   "touser": "LiXinLong",
-   "toparty": "2",
-   "msgtype": "text",
-   "agentid": 1000016,
-   "text": {
-     "content": "'$DATE' '[$SERVER]' MySQL服务异常"
-   },
-   "safe": 0,
-   "enable_id_trans": 0,
-   "enable_duplicate_check": 0
-   }'
-   PURL="https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=$Gtoken"
-   /usr/bin/curl -s --data-ascii "$body" $PURL >> monitor.log
-  fi
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
- * * * * * /check/monitor_mysql.sh
  
  
-#docker run pmm
+docker run pmm
  docker run \
 --rm \
 --name pmm-client \
@@ -1463,12 +1018,23 @@ PMM_AGENT_SERVER_INSECURE_TLS=1
 PMM_AGENT_SETUP=1 
 PMM_AGENT_CONFIG_FILE=pmm-agent.yml 
 
+pmm2 添加监控帐号
+CREATE USER 'pmm'@'%' IDENTIFIED BY 'pass' WITH MAX_USER_CONNECTIONS 10;
+GRANT SELECT, PROCESS, REPLICATION CLIENT, RELOAD ON *.* TO 'pmm'@'%';
 
-#MSSQL
-#查看存储包含的表
+pmm-admin add mysql --username pmm --password pass mysql-127.0.0.1 127.0.0.1:3306
+
+pmm
+INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_mr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_127.0.0.1",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
+INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_hr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_127.0.0.1",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
+
+
+MSSQL
+```sql
+-查看存储包含的表
 select distinct object_name(id) from syscomments where id in
  (select object_id from sys.objects where type ='P') and text like'%PFCASBENE%';
-#查看正在运行的语句
+-查看正在运行的语句
 
 USE master
 GO
@@ -1503,12 +1069,10 @@ CROSS APPLY sys.dm_exec_sql_text(er.sql_handle) AS st
 	join sys.dm_exec_connections c
 		on er.session_id = c.session_id
 
+```
 
-#pmm2 添加监控帐号
-CREATE USER 'pmm'@'%' IDENTIFIED BY 'pass' WITH MAX_USER_CONNECTIONS 10;
-GRANT SELECT, PROCESS, REPLICATION CLIENT, RELOAD ON *.* TO 'pmm'@'%';
 
-#nginx
+nginx
 nginx1.20安装
 
 tar -zxvf nginx-1.20.1.tar.gz
@@ -1536,59 +1100,13 @@ systemctl is-enabled nginx.service
 vim ../conf/nginx.conf
 nginx -s reload
 
-#if ($request_method ~* PUT|OPTIONS|TRACE){
-#         return 403;
-#       }
-#
-
-
-#start.sh stop.sh
-ps -ef|grep pmm-agent|grep -v grep|grep -v kill|awk '{print $2}'
-	
-	
-kill -15 $(ps -ef|grep pmm-agent|grep -v grep|grep -v kill|awk '{print $2}')
-	
-	
-	
-#!/bin/sh
-APP_NAME=pmm-agent
-tpid1=`ps -ef|grep $APP_NAME|grep -v grep|grep -v kill|awk '{print $2}'`
-echo tpid1-$tpid1
-    if [[ $tpid1 ]]; then
-    echo 'Stop Process...'
-    kill -15 $tpid1
-fi
-sleep 5
-tpid2=`ps -ef|grep $APP_NAME|grep -v grep|grep -v kill|awk '{print $2}'`
-    echo tpid2-$tpid2
-if [[ $tpid2 ]]; then
-    echo 'Kill Process!'
-    kill -9 $tpid2
-else
-    echo 'Stop Success!'
-fi
-
-
-
-#!/bin/sh
-APP_NAME=/usr/local/percona/pmm2/bin/pmm-agent
-echo Starting application 
-#rm -f tpid
-source /etc/profile
-nohup $APP_NAME --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml >/dev/null 2>&1 &
-#echo $! > tpid
-echo $!
-
-
-pmm-admin add mysql --username pmm --password pass mysql-127.0.0.1 127.0.0.1:3306
-
 
 firewall-cmd --zone=public --add-port=8080/tcp --permanent
 firewall-cmd --reload
 firewall-cmd --query-port=9090/tcp
 
-#PG14安装
-
+PG14安装
+```sql
 -- 下载源码包 
 wget https://ftp.postgresql.org/pub/source/v14.2/data/data/postgresql-14.2.tar.gz --no-check-certificate 
 wget https://ftp.postgresql.org/pub/source/v13.3/data/data/postgresql-13.3.tar.gz 
@@ -1657,115 +1175,17 @@ EOF
 cat > /data/postgresql/pgdata/pg_hba.conf << EOF 
 #TYPE DATABASE USER ADDRESS METHOD host all all 0.0.0.0/0 md5 
 EOF
+```
 
-
-stdprm
-127.0.0.1：
-AS400_to_P20_LifeMir20210913
-AS400_to_P30_LifeMir20191223
-127.0.0.1：
-AS400-100_216_LifeMir
-AS400-99_11_LifeMir
-AS400_to_100_98_LifeMir
-AS400_to_100_99_LifeMir
-
-C:\Program Files(x86)\IBM\WebSphere\AppServer\profiles\AppSrv01\temp\shgapppreNode01\server1\CSGCS_war\CSGCS.war
-
-
-\IBM\WebSphere\AppServer\profiles\AppSrv01\temp\shgapppre1Node01\server1\CSGCS_war\CSGCS.war
+C:\Program Files(x86)\IBM\WebSphere\AppServer\profiles\AppSrv01\temp\shgapppreNode01\server1\
+\IBM\WebSphere\AppServer\profiles\AppSrv01\temp\shgapppre1Node01\server1\
 
 {xor}CiwAOC0wKi8bHQ==
 
 ${MICROSOFT_JDBC_DRIVER_PATH}/sqljdbc4.jar
 
-   
---mycat2
-   /*+ mycat:createDataSource{
-"name":"master",
-"instanceType":"WRITE",
-"url":"jdbc:mysql://127.0.0.1:3306",
-"user":"lixl",
-"password":"lixl"
-} */;
-
-/*+ mycat:createDataSource{
-"name":"slave",
-"instanceType":"READ",
-"url":"jdbc:mysql://127.0.0.1:3306",
-"user":"lixl",
-"password":"lixl"
-} */;
-
-/*! mycat:createCluster{
-"name":"prototype",
-"masters":"master",
-"replicas":["slave"],
-"readBalanceType":"BALANCE_ALL_READ",
-"readBalanceName":"BalanceLeastActive"
-} */;
-
-/*+ mycat:createSchema{
-  "customTables":{},
-  "globalTables":{},
-  "normalTables":{},
-  "schemaName":"area",
-  "shardingTables":{},
-  "targetName":"prototype"
-} */;
-
-
-数据库：P20，LifeExt
-SQL：update PUB_T_PLAN_INFO1 set EXT_EVOICE_FEILD1='FH',DOUBLE_MAIN_FIELD='FH' where PLANTYPE = 'BJ';
-影响条数：12条。
-
-回滚SQL：update PUB_T_PLAN_INFO1 set EXT_EVOICE_FEILD1='CTX',DOUBLE_MAIN_FIELD='CTX' where PLANTYPE = 'BJ';
-
-global:
-  resolve_timeout: 5m
-
-route:
-  group_by: ['alertname']
-  group_wait: 10s
-  group_interval: 30s
-  repeat_interval: 5m
-  receiver: 'wxwork'
-  routes:
-  - receiver: 'collect'
-    repeat_interval: 5m
-    match_re:
-      alertname: mssql_active_transactions|MySQL_threads_running_High|win_cpu_usage
-    continue: true
-  - receiver: 'wxwork'
-    repeat_interval: 12h
-    match_re:
-      alertname: mssql_db_log_size
-    continue: false
-  - receiver: 'wxwork'
-    repeat_interval: 10m
-    continue: true
-receivers:
-- name: 'wxwork'
-  webhook_configs:
-  - url: 'http://127.0.0.1:10086/wxwork'
-- name: 'mail'
-  webhook_configs:
-  - url: 'http://127.0.0.1:10086/mail'
-- name: 'collect'
-  webhook_configs:
-  - url: 'http://127.0.0.1:10086/collect'
-    send_resolved: false
-inhibit_rules:
-  - source_match:
-      severity: 'critical'
-    target_match:
-      severity: 'warning'
-    equal: ['alertname', 'instance']
-#
-
-
-
-
-
+ MySQL MGR
+```sql
 select hostgroup,username,digest_text from stats_mysql_query_digest;
 select hostgroup_id,hostname,port,status,weight from mysql_servers; 
 select * from mysql_replication_hostgroups;
@@ -1852,6 +1272,22 @@ WHERE g.object_type = 'TABLE';​​
 
 netsh advfirewall firewall add rule name="Win-RM-HTTP" dir=in localport=5985 protocol=TCP action=allow
 
+mgr
+引导
+SET GLOBAL group_replication_bootstrap_group=ON;
+
+注册节点信任ip
+set global group_replication_ip_allowlist="17.16.10.129,17.16.10.130,17.16.10.131";
+
+开始组复制
+START GROUP_REPLICATION;
+
+引导关闭、其他节点注册节点开启组复制即可
+SET GLOBAL group_replication_bootstrap_group=OFF;
+SELECT * FROM performance_schema.replication_group_members;
+STOP GROUP_REPLICATION;
+
+```
 
 停止所有的容器
 docker stop $(docker ps -aq)
@@ -1860,11 +1296,10 @@ docker rm $(docker ps -aq)
 删除所有的镜像
 docker rmi $(docker images -q)
 
-
-
 Consolas, 'Courier New', monospace#vscode 默认字体
 
-#sh 查看binlog事务大小脚本
+查看binlog事务大小脚本
+```sql
 [root@postgre binlog]#../../mysql_basedir_3306/bin/mysqlbinlog mysql-bin.000014 |grep "GTID$(printf '\t')last_committed" -B 1 \
 |grep -E '^#at' \
 |awk '{print $3}' \
@@ -1884,108 +1319,117 @@ Consolas, 'Courier New', monospace#vscode 默认字体
 1. 过滤 tab 字符，用到了 "$(printf '\t')" 来插入 tab 字符，无法直接使用 "\t" 字符。
 2. 使用 -B 参数向前找到了匹配的前一行，输出 "at xxx"，这一行是 GTID_event 在 binlog 中的位置
 （单位是字节）。
-
+```
 
 #解决鼎甲原生xtrabackup版本兼容问题所产生依赖问题
- 440  tar xf percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17.tar.gz
-  441  cd percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/
-  442  ll
-  443  cd bin/
-  444  ll
-  445  ./xtrabackup --help
-  446  cd /opt/
-  447  ll
-  448  cd scutech/dbackup3/bin/
-  449  ll
-  450  ./xtrabackup-8.0 --help
-  451  ./xbstream --version
-  452  pwd
-  453  /opt/scutech/dbackup3/bin/xbstream --version
-  454  /opt/scutech/dbackup3/bin/xbstream --help
-  455  /opt/percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/bin/xbstream --version
-  456  cd /opt/scutech/dbackup3/bin/
-  457  ll
-  458  rm -rf xbstream
-  459  ll
-  460  mv xtrabackup-8.0 xtrabackup-8.0_bak
-  461  ll /opt/percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/bin/
-  462  mv /opt/percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/bin/xtrabackup /opt/scutech/bin
-  463  ll
-  464  pwd
-  465  mv /opt/percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/bin/xtrabackup /opt/scutech/dbackup3/bin/
-  466  ll /opt/scutech/
-  467  mv /opt/scutech/bin /opt/scutech/dbackup3/bin/xtrabackup-8.0
-  468  ll
-  469  ln -s xbstream /opt/scutech/dbackup3/bin/xtrabackup-8.0
-  470  ln -s /opt/scutech/dbackup3/bin/xtrabackup-8.0 xbstream
-  471  ll
-  472  ./xbstream
-  473  ./xbstream --version
-  474  cd /usr/lib64
-  475  ln -s libgcrypt.so.11.8.2 libgcrypt.so
-  476  ln -s libprocps.so.4.0.0 libprocps.so
-  477  ./xbstream --version
-  478  /opt/scutech/dbackup3/bin/xbstream --version
-  479  ll /usr/lib64/libssl*
-  480  find / name 'libprotobuf'
-  481  find / name 'libprotobuf*'
-  482  /opt/scutech/dbackup3/bin/xbstream --version
-  483  find / name 'libprotobuf-lite.so.3.11.4'
-  484  find / name "libprotobuf-lite.so.3.11.4"
-  485  ;;
-  486  ll
-  487  /opt/scutech/dbackup3/bin/xbstream --version
-  488  vim /data/mariadb/mycnf/
-  489  vim /data/mariadb/mycnf/my.cnf
-  490  vim /data/mysql8/mycnf/my.cnf
-  491  systemctl restart mysql8
-  492  systemctl restart mariadb.service
-  493  top
-  494  ll
-  495  /opt/scutech/dbackup3/bin/xbstream --version
-  496  ln -s libssl.so.1.0.2k libssl.so
-  497  ln -s libcrypto.so.1.0.2k libcrypto.so
-  498  /opt/scutech/dbackup3/bin/xbstream --version
-  499  ll /usr/local/mysql8_basedir/lib/
-  500  yum -y install autoconf automake libtool curl make g++ unzip
-  501  cd /opt/scutech/dbackup3/bin/
-  502  ll
-  503  ./xtrabackup-8.0_bak --version
-  504  rm -rf xbstream
-  505  ./xtrabackup-8.0 --version
-  506  ln -s xtrabackup-8.0 xbstream
-  507  ll
-  508  ./xbstream --version
-  509  rm -rf xbstream
-  510  ln -s xtrabackup-8.0 xbstream
-  511  ./xbstream --version
-  512  cd /usr/lib64/
-  513  ln -s libprotobuf-lite.so.3.19.4 libprotobuf-lite.so.3.11.4
-  514  ll libpro*
-  515  /opt/scutech/dbackup3/bin/xbstream --version
+鼎甲8.0还原 取相应版本的xtrabackup（backup）或者 xbstream（restore）
+还原：鼎甲需映射 xbstream -> xbstream-8.0 鼎甲取参(xbstream-8.0),需新版copy，最终应用是xbstream 需做 ln -s
+备份：新版copy(xtrabackup-8.0)到bin目录，需映射 xbstream -> xtrabackup-8.0;
+5.7保持 xbstream -> xtrabackup-8.0 即可。
+undo参数初始化后调整参数有异常，需删掉undo tablespace，可直接删除/data 空间
+
+```sql
+
+[postgres@localhost ~]   tar xf percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17.tar.gz
+[postgres@localhost ~]   cd percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   cd bin/
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   ./xtrabackup --help
+[postgres@localhost ~]   cd /opt/
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   cd scutech/dbackup3/bin/
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   ./xtrabackup-8.0 --help
+[postgres@localhost ~]   ./xbstream --version
+[postgres@localhost ~]   pwd
+[postgres@localhost ~]   /opt/scutech/dbackup3/bin/xbstream --version
+[postgres@localhost ~]   /opt/scutech/dbackup3/bin/xbstream --help
+[postgres@localhost ~]   /opt/percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/bin/xbstream --version
+[postgres@localhost ~]   cd /opt/scutech/dbackup3/bin/
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   rm -rf xbstream
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   mv xtrabackup-8.0 xtrabackup-8.0_bak
+[postgres@localhost ~]   ll /opt/percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/bin/
+[postgres@localhost ~]   mv /opt/percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/bin/xtrabackup /opt/scutech/bin
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   pwd
+[postgres@localhost ~]   mv /opt/percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/bin/xtrabackup /opt/scutech/dbackup3/bin/
+[postgres@localhost ~]   ll /opt/scutech/
+[postgres@localhost ~]   mv /opt/scutech/bin /opt/scutech/dbackup3/bin/xtrabackup-8.0
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   ln -s xbstream /opt/scutech/dbackup3/bin/xtrabackup-8.0
+[postgres@localhost ~]   ln -s /opt/scutech/dbackup3/bin/xtrabackup-8.0 xbstream
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   ./xbstream
+[postgres@localhost ~]   ./xbstream --version
+[postgres@localhost ~]   cd /usr/lib64
+[postgres@localhost ~]   ln -s libgcrypt.so.11.8.2 libgcrypt.so
+[postgres@localhost ~]   ln -s libprocps.so.4.0.0 libprocps.so
+[postgres@localhost ~]   ./xbstream --version
+[postgres@localhost ~]   /opt/scutech/dbackup3/bin/xbstream --version
+[postgres@localhost ~]   ll /usr/lib64/libssl*
+[postgres@localhost ~]   find / name 'libprotobuf'
+[postgres@localhost ~]   find / name 'libprotobuf*'
+[postgres@localhost ~]   /opt/scutech/dbackup3/bin/xbstream --version
+[postgres@localhost ~]   find / name 'libprotobuf-lite.so.3.11.4'
+[postgres@localhost ~]   find / name "libprotobuf-lite.so.3.11.4"
+[postgres@localhost ~]   ;;
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   /opt/scutech/dbackup3/bin/xbstream --version
+[postgres@localhost ~]   vim /data/mariadb/mycnf/
+[postgres@localhost ~]   vim /data/mariadb/mycnf/my.cnf
+[postgres@localhost ~]   vim /data/mysql8/mycnf/my.cnf
+[postgres@localhost ~]   systemctl restart mysql8
+[postgres@localhost ~]   systemctl restart mariadb.service
+[postgres@localhost ~]   top
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   /opt/scutech/dbackup3/bin/xbstream --version
+[postgres@localhost ~]   ln -s libssl.so.1.0.2k libssl.so
+[postgres@localhost ~]   ln -s libcrypto.so.1.0.2k libcrypto.so
+[postgres@localhost ~]   /opt/scutech/dbackup3/bin/xbstream --version
+[postgres@localhost ~]   ll /usr/local/mysql8_basedir/lib/
+[postgres@localhost ~]   yum -y install autoconf automake libtool curl make g++ unzip
+[postgres@localhost ~]   cd /opt/scutech/dbackup3/bin/
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   ./xtrabackup-8.0_bak --version
+[postgres@localhost ~]   rm -rf xbstream
+[postgres@localhost ~]   ./xtrabackup-8.0 --version
+[postgres@localhost ~]   ln -s xtrabackup-8.0 xbstream
+[postgres@localhost ~]   ll
+[postgres@localhost ~]   ./xbstream --version
+[postgres@localhost ~]   rm -rf xbstream
+[postgres@localhost ~]   ln -s xtrabackup-8.0 xbstream
+[postgres@localhost ~]   ./xbstream --version
+[postgres@localhost ~]   cd /usr/lib64/
+[postgres@localhost ~]   ln -s libprotobuf-lite.so.3.19.4 libprotobuf-lite.so.3.11.4
+[postgres@localhost ~]   ll libpro*
+[postgres@localhost ~]   /opt/scutech/dbackup3/bin/xbstream --version
+
+```
+
+navicat sql保存目录
+C:\Users\users\Documents\Navicat\MySQL\servers
 
 
-#navicat sql保存目录
-C:\Users\itwb_lixl\Documents\Navicat\MySQL\servers
-
-
-#查看磁盘实用百分比
+查看磁盘实用百分比
 df -h /dev/sda1 | sed -n '/% \//p' | gawk '{ print $5 }'
-#查看僵尸进程
+
+查看僵尸进程
 ps -al | gawk '{print $2,$4}' | grep Z
-#查看内存使用百分比
+
+查看内存使用百分比
 free | sed -n '2p' | gawk 'x = int(( $3 / $2 ) * 100) {print x}' | sed 's/$/%/'
-#uptime获取在线用户数
+
+uptime获取在线用户数
 uptime | sed 's/user.*$//' | gawk '{print $NF}'
 
 
-#pmm
-INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_mr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_127.0.0.1",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
-INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_hr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_127.0.0.1",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
 
-#
-#tshark 简单使用
-#
+
+tshark 简单使用
+```sql
 -c, 50 抓包数量
 -w, /tmp/97.222.pcap 输出文件
 -T, fields，可以指定需要输出的字段，需配合-e一起使用，此处将分别打印获取包的时间、主机IP及TCP的标志位，这些字段会按照-e的顺序进行排列展示
@@ -2012,12 +1456,16 @@ tshark -i ens33 -f 'tcp port 5432' -Y "pgsql.query" -d tcp.port==5432,pgsql -T f
 tshark -i ens33 -d tcp.port==5432,pgsql -f "host 127.0.0.1 and tcp port 5432" -T fields -e frame.time -e ip.host -e tcp.flags
 tshark -i ens33 -d tcp.port==5432,pgsql -Y 'pgsql.query contains "delete"' -T fields -e ip.host -e pgsql.query -e frame.time
 
+```
 
-#proxysql
+proxysql
+```sql
 INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,'127.0.0.2',3306);
 INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,'127.0.0.2',3306);
+```
 
-#master monitor
+master monitor
+```sql
 mysql -e "GRANT REPLICATION SLAVE ON *.* TO 'monitor'@'172.18.100.%' IDENTIFIED BY 'monitor';"
 
 SET mysql-monitor_username='monitor';
@@ -2031,8 +1479,10 @@ SELECT * FROM mysql_replication_hostgroups;
 LOAD MYSQL SERVERS TO RUNTIME;
 SELECT * FROM mysql_servers;
 SAVE MYSQL SERVERS TO DISK;
+```
 
-#MHA master crash
+MHA master crash
+```sql
 第一步：检查配置
 binlog server
  1.检查ssh连通性
@@ -2105,19 +1555,10 @@ MHA，全称Master High Availability，是一款开源的MySQL高可用性解决
 4. 选主：MHA会选择一个从节点作为新的主节点，这个节点拥有最新的数据。
 5. 数据同步：MHA会将其他从节点的数据同步到新的主节点，确保数据一致性。
 6. 切换：MHA会将所有对主节点的请求重定向到新的主节点，完成故障转移。
-	 
-#mgr
-#引导
-SET GLOBAL group_replication_bootstrap_group=ON;
-#注册节点信任ip
-set global group_replication_ip_allowlist="17.16.10.129,17.16.10.130,17.16.10.131";
-#开始组复制
-START GROUP_REPLICATION;
-#引导关闭、其他节点注册节点开启组复制即可
-SET GLOBAL group_replication_bootstrap_group=OFF;
-SELECT * FROM performance_schema.replication_group_members;
-STOP GROUP_REPLICATION;
+```
 
+知识点
+```sql
 索引
 双写原理
 SQL执行过程
@@ -2131,6 +1572,20 @@ redo undo
 锁
 MySQL体系结构
 
+1.xtraback原理 
+2.高可用相关mha原理架构 
+3.隔离级别 唯一索引出发锁机制
+4.主从原理 sql线程算法（？）
+5.监控指标 
+6.死锁监控 
+7.故障处理 
+8.ddl 
+9.innodb特性 八股文 
+10.btree索引原理 
+```
+
+proxysql
+```sql
 insert into mysql_servers(hostgroup_id,hostname,port,weight,max_connections,max_replication_lag,comment) values (10,'17.16.10.129',3306,1,3000,10,'mgr_node1');
 insert into mysql_servers(hostgroup_id,hostname,port,weight,max_connections,max_replication_lag,comment) values (10,'17.16.10.130',3306,1,3000,10,'mgr_node2');
 insert into mysql_servers(hostgroup_id,hostname,port,weight,max_connections,max_replication_lag,comment) values (10,'17.16.10.131',3306,1,3000,10,'mgr_node3');
@@ -2151,43 +1606,32 @@ select hostgroup_id,hostname,port,status,max_replication_lag from runtime_mysql_
 
 sysbench /usr/share/sysbench/oltp_common.lua --mysql-host=127.0.0.2 --mysql-port=3308 --mysql-user=us_hammer --mysql-password='2P001' --mysql-db=hammer --tables=10 --table-size=1000000 --db-driver=mysql --report-interval=1 prepare
 sysbench --threads=50 /usr/share/sysbench/oltp_read_write.lua --table-size=1000000 --tables=10 --point_selects=2  --index_updates=2 --non_index_updates=1 --delete_inserts=1 --report-interval=1 --mysql-host=127.0.0.2 --mysql-port=3308 --mysql-user=us_hammer --mysql-password='2P001' --mysql-db=hammer --time=120  run
-
-前台用户管理 
-commPlatform-admin.jar
-172.28.250.92
-172.28.250.135
+```
 
 
-
-前台用户
-userauth.jar
-172.28.250.236
-172.28.250.104
-
-展业app
-gwcslifeApp.jar
-172.28.249.180
-172.28.249.213
-
-
-172.28.240.137
-172.28.240.224
-
-
-#加密 可逆 PostgreSQL14
+加密 可逆 PostgreSQL14
+```sql
 select encrypt('Q','PostgreSQL_NB','aes')
-不可逆 crypt('q1234567890', gen_salt('md5'))
-#解密
-select convert_from(decrypt('\x7da7ddc71a5dece9c31259f1fce1de3b','PostgreSQL_NB272','aes'),'SQL_ASCII');
 
-#iptables 白名单配置
-#systemctl status iptables 运行状态 MySQL端口不可访问 本地通
-#开放端口 开放某个ip访问MySQL端口 重启iptables 失效
+不可逆 
+crypt('q1234567890', gen_salt('md5'))
+
+解密
+select convert_from(decrypt('\x7da7ddc71a5dece9c31259f1fce1de3b','PostgreSQL_NB272','aes'),'SQL_ASCII');
+```
+
+iptables 白名单配置
+systemctl status iptables 运行状态 MySQL端口不可访问 本地通
+
+开放端口 开放某个ip访问MySQL端口 重启iptables 失效
 iptables -I INPUT -s 127.0.0.1 -p TCP --dport 3306 -j ACCEPT
-#永久生效 service iptables save 重启iptables /etc/sysconfig/iptables文件可查看对应规则
-#开放某个端口
+
+永久生效 service iptables save 重启iptables /etc/sysconfig/iptables文件可查看对应规则
+
+开放某个端口
 iptables -I INPUT -p tcp --dport 8090 -j ACCEPT
-#关闭所有的8090端口
+
+关闭所有的8090端口
 iptables -I INPUT -p tcp --dport 8090 -j DROP
 iptables -I INPUT -s 127.0.0.1 -p tcp --dport 8090 -j ACCEPT
 
@@ -2196,76 +1640,24 @@ iptables -I INPUT -s 127.0.0.1 -p tcp --dport 8090 -j ACCEPT
 185.199.108.153 assets-cdn.github.com
 151.101.77.194 github.global.ssl.fastly.net
 
-git init
-git add .
-git status
-git config --global user.name "lixinl0ng"
-git config --global user.email "postgre@126.com"
-git commit -m "注释"
-git remote add origin git@github.com:lixinl0ng/bcp-mssql.git
 
-
-
-2023-08-28 15:12:12.587@informatica@7180@LM_INFO@agent|Job 'MySQL 时间点恢复作业20230828' (id cc71a0d4457111ee8000ac751dade2d1, activity id 35c50a6c457211ee80000050568a78f2) is started.
-2023-08-28 15:12:12.594@informatica@7180@LM_DEBUG@agent|Spawned process 10328 "ps", cwd="(null)"
-2023-08-28 15:12:12.624@informatica@7180@LM_DEBUG@agent|The process 10328 exited with code 0
-2023-08-28 15:12:12.656@informatica@7180@LM_DEBUG@agent|MySQL data directory: /data/mysql/data/
-2023-08-28 15:12:12.664@informatica@7180@LM_INFO@agent|Stopping MySQL instance MySQL-3306
-2023-08-28 15:12:12.666@informatica@7180@LM_DEBUG@agent|Spawned process "sh -c /tmp/script-35d2c40e457211ee80000050568a78f2.sh", pid=10331, cwd="(null)"
-2023-08-28 15:12:16.244@informatica@7180@LM_DEBUG@agent|The process 'sh -c /tmp/script-35d2c40e457211ee80000050568a78f2.sh' exited with code 0
-2023-08-28 15:12:16.248@informatica@7180@LM_DEBUG@agent|Spawned process 10343 "ps", cwd="(null)"
-2023-08-28 15:12:16.275@informatica@7180@LM_DEBUG@agent|The process 10343 exited with code 0
-2023-08-28 15:12:16.277@informatica@7180@LM_ERROR@agent|Failed to find inode of port 3306
-2023-08-28 15:12:16.277@informatica@7180@LM_ERROR@agent|Failed to get PID of MySQL-3306
-2023-08-28 15:12:16.348@informatica@7180@LM_ERROR@agent|Failed to connect to mysql database: Can't connect to local MySQL server through socket '/data/mysql/socket/mysql.sock' (2)
-2023-08-28 15:12:16.348@informatica@7180@LM_DEBUG@agent|Try to login MySQL-3306
-2023-08-28 15:12:16.349@informatica@7180@LM_DEBUG@agent|Spawned process 10344 "ps", cwd="(null)"
-2023-08-28 15:12:16.376@informatica@7180@LM_DEBUG@agent|The process 10344 exited with code 0
-2023-08-28 15:12:16.379@informatica@7180@LM_ERROR@agent|Failed to find inode of port 3306
-2023-08-28 15:12:16.379@informatica@7180@LM_ERROR@agent|Failed to get PID of MySQL-3306
-2023-08-28 15:12:16.379@informatica@7180@LM_INFO@agent|Start to transport full backup data to /data/mysql/data/, instance: MySQL-3306
-2023-08-28 15:12:16.494@informatica@7180@LM_ERROR@agent|2023-08-28T15:12:16.486618+08:00 0 [ERROR] [MY-011825] [Xtrabackup] unknown argument: '/data/mysql/data/'
-2023-08-28 15:12:16.499@informatica@7180@LM_ERROR@agent|Failed to write to xbstream, errno=32, Broken pipe
-2023-08-28 15:12:16.531@informatica@7180@LM_ERROR@agent|Failed to restore MySQL physical backup
-2023-08-28 15:12:16.553@informatica@7180@LM_ERROR@agent|Job 'MySQL 时间点恢复作业20230828' (id cc71a0d4457111ee8000ac751dade2d1, activity id 35c50a6c457211ee80000050568a78f2) failed.
-
-
-mysql> select count(*) from sbtest2;
-+----------+
-| count(*) |
-+----------+
-|   451584 |
-+----------+
-1 row in set (0.12 sec)
-
-mysql> select count(*) from sbtest1;
-+----------+
-| count(*) |
-+----------+
-|  1000000 |
-+----------+
-1 row in set (0.06 sec)
-
-
-powershell .\bcp_queryout.ps1 -fileList "LAAssessMaintain:LAAssessMaintain" -src_server 127.0.0.1 -src_user sa -src_password C1234567890 -dst_server 127.0.0.2 -dst_user sa -dst_password q1234567890 -throttle 3
-
-
-#下载可执行文件的tar包
+下载可执行文件的tar包
 wget "https://static-aliyun-doc.oss-cn-hangzhou.aliyuncs.com/file-manage-files/zh-CN/20230406/flxd/qpress-11-linux-x64.tar"
 
-#解压下载的tar包，取出可执行文件
+解压下载的tar包，取出可执行文件
 tar -xvf qpress-11-linux-x64.tar
 
-#设置qpress文件的执行权限
+设置qpress文件的执行权限
 sudo chmod 775 qpress
 
-#拷贝qpress到/usr/bin中
+拷贝qpress到/usr/bin中
 sudo cp qpress /usr/bin
 
 
-*** 命令url https://attunity46.rssing.com/chan-63610596/article30.html
-#AR命令行 
-#获取所有任务列表，然后断开连接
+命令url https://attunity46.rssing.com/chan-63610596/article30.html
+AR命令行 
+```sql
+获取所有任务列表，然后断开连接
 repctl connect; gettasks; disconnect
 
 Paramaters:
@@ -2275,16 +1667,18 @@ Paramaters:
 Flags Values:
 0 = Resume
 1 = Fresh Start (like starting as of now)
-#停止任务
+
+停止任务
 repctl connect; stoptask test_test1; disconnect
-#启动任务
+
+启动任务
 repctl connect; execute test_test1 3 Flags=0; disconnect
 
 
-#获取所有任务列表#
+获取所有任务列表#
 tasks=$(repctl connect; gettasks; disconnect)
 
-#遍历任务列表并启动每个任务
+遍历任务列表并启动每个任务
 for task_name in $tasks; do
     repctl connect; execute $task_name 3 Flags=0; disconnect
 done
@@ -2306,10 +1700,10 @@ flags:optional enum, valid values:
 08 - RECOVERY
 #全量刷 Flags=1 为全量 0 为增量 、operation=1 全量刷完停止任务
 repctl connect; execute test_test1 3 Flags=1; disconnect
-
+```
 
 一条 insert 语句在写入磁盘的过程中到底涉及了哪些文件？顺序又是如何的？下面我们用两张图和大家一 起解析 insert 语句的磁盘写入之旅。
-
+```sql
 图 1：事务提交前的日志文件写入
 过程：
 1. 首先 insert 进入 server 层后，会进行一些必要的检查，检查的过程中并不会涉及到磁盘的写入。
@@ -2347,25 +1741,12 @@ while read relaylogname
 do
 /data/mysql_basedir/bin/mysqlbinlog --base64-output=decode-rows -vvv $relaylogname  | grep -Ei "drop" && echo "RELAYLOG位置: $relaylogname"
 done < /data/mysql/data/informatica-relay-bin.index
+```
 
-# 初始化本地仓库
-git init
 
-# 添加要上传的文件夹
-git add monthlymaintenance
-
-# 提交更改
-git commit -m "commit"
-git remote add origin git@github.com:ceriar/databases.git
-# 关联到远程仓库
-git remote add origin git@github.com:xinl0ngli/PostgreSQL.git
-git remote add origin git@github.com:lcerll/MySQL-note.git
-# 推送更改到 GitHub
-git pull origin main
-git push -u origin master
-
-#20240229
-#load data for mysql
+20240229
+load data for mysql
+```sql
 lixl@msql[(none)]> LOAD DATA INFILE '/data/mysql_8034/file/20240229.txt'
     -> REPLACE INTO TABLE testg.datetest
     -> CHARACTER SET utf8mb4
@@ -2410,14 +1791,17 @@ Query OK, 358138 rows affected (0.42 sec)
     ->      SET o_id=@C1,o_w_id=@C2,o_d_id=@C3,o_c_id=@C4,o_entry_d=@C8; -- 指定txt列与字段对应关系，
 Query OK, 358138 rows affected (6.30 sec)
 Records: 358138  Deleted: 0  Skipped: 0  Warnings: 0
+```
 
-
-#my2sql
+my2sql
+```sql
 ./my2sql -user lixl -password lixl -host 127.0.0.1 -port 3306 -mode file -local-binlog-file /data/mysql_8034/binlog/mysql-bin.000111 -work-type stats -start-file /data/mysql_8034/binlog/mysql-bin.000111 -output-dir ./tmpdir
+```
 
-#PostGreSQL checkpoint，
-
+PostGreSQL checkpoint，
+```sql
 checkpoint检查点，一般会将某个时间节点之前的脏数据全部刷到磁盘，是为了实现数据一致性和完整性、业界主流RDBMS关系型数据库都具备该功能。目的是为了缩短崩溃恢复时间，之后一系列的应用WAL日志。
+```
 
 postgresql-15.2\src\include\access\xlog.h
 
@@ -2441,13 +1825,13 @@ postgresql-15.2\src\include\access\xlog.h
 从注释来看checkpoint触发机制 与MySQL 是有相似的。
 
 
-# 在8.0版本之前，我们可以通过授予该用户对mysql.proc的select权限来达成目的。
+ 在8.0版本之前，我们可以通过授予该用户对mysql.proc的select权限来达成目的。
 grant select on mysql.proc to zhenxi1@'%';
 
-#8.0版本之后，去掉了mysql.proc，所以这种方法，不再有效，一种可替代的方案是，授予该账号对所有库的select权限。
+8.0版本之后，去掉了mysql.proc，所以这种方法，不再有效，一种可替代的方案是，授予该账号对所有库的select权限。
 grant select on *.* to zhenxi1@'%'
 
-#授予用户对所有库的select权限，范围太广了，所以mysql从8.0.20开始增加了show_routine权限，解决这个问题：
+授予用户对所有库的select权限，范围太广了，所以mysql从8.0.20开始增加了show_routine权限，解决这个问题：
 GRANT show_routine on *.* TO 'zhenxi1'@'%'
 https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_show-routine
 需要注意的是show_routine是一个global privilege，需要在全局授予，也即*.*，不能在库级别授予，否则，将会报如下错误：ERROR 1221 (HY000): Incorrect usage of DB GRANT and GLOBAL PRIVILEGES
@@ -2456,12 +1840,10 @@ https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_show-routi
 CREATE USER 'exporter'@'%' IDENTIFIED BY 'P001!' WITH MAX_USER_CONNECTIONS 3;
 GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%';
 
-
 GRANT SELECT, PROCESS, SUPER, REPLICATION CLIENT ON *.* TO 'exporter'@'%' WITH MAX_USER_CONNECTIONS 3;
 
 
 
-####
 su - mysql
 currdt=`date +%Y%m%d_%H%M%S`
 echo "$currdt" > /tmp/currdt_tmp.txt
@@ -2607,7 +1989,7 @@ perf top -p $mpid
 perf record -a -g -F 1000 -p $mpid -o pdata_2.dat
 perf report -i pdata_2.dat
 
-#诊断
+诊断:
 • top 主机负载情况
 • dmesg | tail 是否存在oom-killer 或 tcp drop等错误信息
 • vmstat 1 检查r、free、si、so、us, sy, id, wa, st列
@@ -2631,7 +2013,7 @@ information_schema.INNODB_LOCK_WAITS a
  INNER JOIN information_schema.INNODB_TRX c ON a.blocking_trx_id=c.trx_id
  INNER JOIN information_schema.PROCESSLIST d ON c.trx_mysql_thread_id=d.ID ;
 
-#gh-ost丢数据原因
+gh-ost丢数据原因:
 应该和两阶段提交有关，两阶段提交先写redo log设置prepare阶段，再写binlog，最后将redo log设置为commit状态。
 在写完binlog，没标记redo log commit状态的时候，启动gh-ost，完成binlog监听，select最大最小边界值，就会出现丢数据。
 和主从同步关系应该不大。即使没有从库，也会丢数据的。  
@@ -2643,11 +2025,11 @@ information_schema.INNODB_LOCK_WAITS a
 
 没有使用半同步也存在这种问题，sync阶段binlog落盘到commit阶段释放锁资源，这个时间差内的数据都存在上面问题，只是半同步放大这种问题
 
-#bcp-mssql
+bcp-mssql
 powershell .\bcp_queryout.ps1 -fileList "F_CUSTOM:F_CUSTOM" -src_server 127.0.0.1 -src_db NissayLis -src_user sa -src_password C1234567890 -dst_server 127.0.0.2 -dst_db NissayLis_DB -dst_user sa -dst_password q1234567890 -throttle 5
 
 
-#查询slow_log表中每天第一个慢查询的 start_time\query_time
+查询slow_log表中每天第一个慢查询的 start_time\query_time
 SELECT * FROM
 (
 SELECT 
@@ -2661,7 +2043,9 @@ from mysql.slow_log where start_time >= '2024-03-24' order by start_time,query_t
 )a WHERE rn <= 5
 
 
-#mysql5.7 row_number 通过start_time列获取相同一天进行倒叙排序(query_time)
+mysql5.7 row_number 
+```sql
+row_number 通过start_time列获取相同一天进行倒叙排序(query_time)
 SET @rn := 0; -- 初始化 @rn
 SET @start_day := NULL; -- 初始化 @start_day
 
@@ -2722,13 +2106,15 @@ SELECT
 CONCAT("ALTER TABLE t_recments ",GROUP_CONCAT(CONCAT("DROP INDEX ", index_name) SEPARATOR ", "),";") AS drop_index_sql
 FROM information_schema.statistics 
 WHERE TABLE_NAME='t_recments' AND CARDINALITY < '100000';
+```
 
 在 READ-COMMITTED 隔离级别，也会存在 gap lock，只发生
 在：唯一约束检查到有唯一冲突的时候，会加 S Next-key Lock，即对记录以及与和上一条记录之间的
 间隙加共享锁。
 
-# 参考{https://opensource.actionsky.com/20210915-mysql/}
-# 利用mysql-shell 做垂直拆表demo。
+参考{https://opensource.actionsky.com/20210915-mysql/}
+ -利用mysql-shell 做垂直拆表demo。
+ ```sql
  MySQL  localhost  Py > conn1 = 'mysql://lixl:lixl@127.0.0.1:3306/testdb'
  MySQL  localhost  Py > rs = mysql.get_classic_session(conn1);
  MySQL  localhost  Py > field_list = []
@@ -2785,8 +2171,10 @@ Query OK, 0 rows affected (0.0057 sec)
 Query OK, 10000 rows affected (0.2247 sec)
 
 Records: 10000  Duplicates: 0  Warnings: 0
+```
 
-#mysql 5.7禁用ssl
+mysql 5.7禁用ssl
+```sql
  MySQL  Py > conn1 = 'mysql://root:C1234567890@127.0.0.2:3306/ats?ssl-mode=DISABLED'
  MySQL  Py > rs = mysql.get_classic_session(conn1);
  MySQL  Py > rs.run_sql('select * from mysql.user')
@@ -2811,14 +2199,18 @@ for i in range(0, len(field_names), 20):
         create_table_sql += f", `{field_name}` {column_type}"  # Wrap field names with backticks
     create_table_sql += ")"
     rs.run_sql(create_table_sql)
+	```
 	
 pg加密
+```sql
 INSERT INTO users (username, password)
 VALUES ('it', pgp_sym_encrypt('123456', 'lixl'));
 SELECT username, pgp_sym_decrypt(password::bytea, 'lixl'::text) AS decrypted_password FROM users WHERE id ='1';
+```
 
 pg审计插件
 https://github.com/pgaudit/pgaudit 找对应支持的版本
+```sql
 select name,setting from pg_settings where name ~ 'pgaudit';
 alter system set pgaudit.log = 'read, write, ddl';		
 set pgaudit.log = 'read, write, ddl';
@@ -2863,7 +2255,7 @@ BEGIN
         PERFORM pg_sleep(2);
         -- 插入新的记录
         INSERT INTO users (id, username, password, key)
-        VALUES (65432,'itwb_lixl', pgp_sym_encrypt('P@ssw0rd123', new_key), new_key);
+        VALUES (65432,'users', pgp_sym_encrypt('P@ssw0rd123', new_key), new_key);
 
     EXCEPTION
         WHEN OTHERS THEN
@@ -2915,7 +2307,7 @@ create extension pg_cron;
 SET ROLE daily_user; CALL daily_schema.i(); reset role;
 
 select * from users
-
+```
 
 Redo Log 的持久化：
 在 2PC 的准备阶段，参与者会将 PREPARE 记录写入 redo log buffer，并通过 write 操作将数据写入到 redo log 文件的 page cache 中。
@@ -2927,7 +2319,7 @@ fsync 操作确保 redo log 中的 COMMIT 记录被持久化到磁盘，并在 b
 
 
 MySQL DDL 的原理简析
-
+```sql
 copy 算法
 较简单的实现方法，MySQL 会建立一个新的临时表，把源表的所有数据写入到临时表，在此期间无法对源表进行数据写入。MySQL 在完成临时表的写入之后，用临时表替换掉源表。这个算法主要被早期（<=5.5）版本所使用。
 
@@ -2960,13 +2352,14 @@ Commit阶段：
 instant 算法
 	MySQL 8.0.12 才提出的新算法，目前只支持添加列等少量操作，利用 8.0 新的表结构设计，可以直接修改表的 metadata 数据，省掉了 rebuild 的过程，极大的缩短了 DDL 语句的执行时间。
 	
-	
+```
 	
 systemctl命令tab自动补全
 yum install -y bash-completion
 
 
 mysql 5.7.27 源码编译安装（debug）
+```sql
 cmake \
 -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \
 -DMYSQL_DATADIR=/data/mysql/data \
@@ -3082,15 +2475,16 @@ Services添加如下
 EnvironmentFile=-/etc/sysconfig/mysql
 
 echo "LD_PRELOAD=libjemalloc.so" >>/etc/sysconfig/mysql
-最后重启mysql
 
-#ubuntu  systemctl 禁止分页
+最后重启mysql
+```
+ubuntu  systemctl 禁止分页:
 Bash (~/.bashrc 或 ~/.bash_profile):
 bash
 复制代码
 export SYSTEMD_PAGER=
 
-#itil pg表详情
+itil pg表详情:
 -- 设计变更审批人 以及变更实施人 update20250110
 SELECT * FROM changeroleusermapping WHERE changeid=3183
 SELECT c.changeid,c.wfstageid,ch.description,to_timestamp(c.commentedon / 1000) AS commentedon,a.first_name 
@@ -3138,6 +2532,7 @@ FROM
 
 
 --变更详细
+```sql
 --------------------------------------------------------------------------------------
 function plan1需要
 CREATE OR REPLACE FUNCTION longtodate(bigint)
@@ -3362,11 +2757,7 @@ JOIN aaauser a ON c.commentedby = a.user_id
 WHERE ch.wfstageid = '3'
 GROUP BY c.changeid
 ORDER BY c.changeid DESC;
-
-
-chmod u+w /etc/sudoers
-itwb_hongsheng ALL=(ALL) ALL
-chmod u-w /etc/sudoers
+```
 
 
 innodb_max_dirty_pages_pct = 0 #设置为 0，表示禁用脏页的使用，即在页面变为脏页之前，InnoDB 会将缓冲池中的数据刷新到磁盘。
@@ -3376,13 +2767,6 @@ https://kkjiasu.top/api/v1/client/subscribe?token=9fcc82f52c98c4d480a0eb28150487
 
 https://cpdd.one/sub?token=6ddcc2d3e9c9d089ea63e066c4f3f4d6
 
-鼎甲8.0还原 取相应版本的xtrabackup（backup）或者 xbstream（restore）
-还原：鼎甲需映射 xbstream -> xbstream-8.0 鼎甲取参(xbstream-8.0),需新版copy，最终应用是xbstream 需做 ln -s
-备份：新版copy(xtrabackup-8.0)到bin目录，需映射 xbstream -> xtrabackup-8.0;
-5.7保持 xbstream -> xtrabackup-8.0 即可。
-undo参数初始化后调整参数有异常，需删掉undo tablespace，可直接删除/data 空间
-
-1.xtraback原理 2.高可用相关mha原理架构 3.隔离级别 唯一索引出发锁机制 4.主从原理 sql线程算法（？）5.监控指标 6.死锁监控 7.故障处理 8.ddl 9.innodb特性 八股文 10.btree索引原理 pg 1.常用系统表以及视图 2.高可用 3.体系架构
 
 SELECT
 *
@@ -3411,7 +2795,6 @@ mysql-js> dba.stopSandboxInstance(3307)   // 停止
 mysql-js> dba.deleteSandboxInstance(3307)
 
 
-
 systemctl命令tab自动补全
 yum install -y bash-completion
 
@@ -3433,22 +2816,6 @@ thread 3
              --lc-messages=english \
              --explicit_defaults_for_timestamp=1 &
 			 
-git sync remote
-# 更新或新增文件后
-git add .
-git commit -m "更新 a.txt，新增 c.txt"
-git push -u origin master
-推送到github
-
---git push --set-upstream master
-
- git rm --cached percona-qa #不在跟踪此目录
-
-#username 主体更改
- git remote -v
- git remote set-url origin  [newname]
- 
- 
  
 1.复制.ibd文件以来，该表一定不能删除或截断，因为这样做会更改存储在表空间中的表ID。
 2.发出以下ALTER TABLE语句以删除当前.ibd文件：
