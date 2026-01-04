@@ -1,39 +1,53 @@
 20220217
 
-#打开等待事件采集器配置项开关，需要修改配置表中对应的采集器配置项
+#采集器配置项
+打开等待事件采集器配置项开关，需要修改配置表中对应的采集器配置项
+```sql
 update setup_instruments set enabled ='yes',timed='yes' where name like 'wait%';
+```
 
-#打开等待时间的保存表配置开关，修改配置表中对应的配置项
+打开等待时间的保存表配置开关，修改配置表中对应的配置项
+```sql
 update setup_consumers set enabled ='yes' where name like '%wait%';
+```
 
-#导出备份
+# dump
+```sql
 mysqldump -h127.0.0.1 -ulixl -p --single-transaction --skip-opt --databases bioinfo --triggers --routines --events --master-data=2 --delete-master-logs --add-drop-database --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --log-error=/root/bioinfo_error.txt > /root/bioinfo_backup_20220615.sql
+```
 
-#导入数据
+```sql
 1：mysql -uroot -p < /root/bioinfo_backup_20220615.sql
 2：mysql -uroot -p
 MySQL [(none)]> source /root/bioinfo_backup_20220615.sql
+```
 
 #截取position位置并导出sql
 /usr/local/mysql/bin/mysqlbinlog  --start-position="486" /usr/local/mysql/data/mysql-bin.000138 >/138.sql
-
+```sql
 mysql -ulixl -p -e "GRANT REPLICATION SLAVE ON *.* TO 'monitor'@'%' IDENTIFIED BY '2P001';"
 alter user 'monitor'@'localhost' identified by '2P001';
 
 CHANGE MASTER TO MASTER_LOG_FILE='mysql-bin.000004',MASTER_LOG_POS=154;
-#从库回放sql
+```
+
 start slave
 
-# 用户有效期
+# user expire
+```sql
 create user loge@'%' identified by '123456' password expire interval 90 day;
 alter user loge@'%' identified by '123456' password expire interval 90 day;
-# 禁用过期，永久不过期：
+
+ 禁用过期，永久不过期：
 create user loge@'%' identified by '123456' password expire never;
 alter user loge@'%' identified by '123456' password expire never;
-# 手动强制某个用户密码过期
+
+手动强制某个用户密码过期
 ALTER USER 'loge'@'%' PASSWORD EXPIRE;
 
 ALTER USER 'test'@'%' identified BY '123' PASSWORD EXPIRE;
+```
+
 # 用户重命名
 rename user 'chenhh'@'%' to 'zhoujielun'@'%';
 
@@ -113,7 +127,8 @@ REVOKE GRANT OPTION on test.* from 'hjm'@'%' ;
 CREATE DATABASE `pos_secondarywriting` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
 select schema_name,default_character_set_name,default_collation_name from information_schema.schemata where schema_name = 'pos_secondarywriting';
 
-#获取cpu搞sql
+# mysql thread
+获取cpu高sql
 top -u mysql -H 查看sql thread id
 select p.* 
 from information_schema.processlist p,performance_schema.threads t 
@@ -152,43 +167,47 @@ revoke show_routine on *.* from 'us_testg'@'%'
 
 revoke ALL privileges ON *.* from `us_testg`@`%`
 
-#备份权限5.7x
+# back permissions5.7x
 alter user 'root'@'localhost' identified by 'P001!';
 CREATE USER 'bkpuser'@'%' IDENTIFIED BY 'P3QaaQPhby)D';
 GRANT RELOAD, LOCK TABLES, PROCESS, REPLICATION CLIENT ON *.* TO'bkpuser'@'%';
 FLUSH PRIVILEGES;
 
-#备份权限8.0x
+# back permissions 8.0x
 CREATE USER 'bkpuser'@'%' IDENTIFIED BY 'Password001';
 GRANT BACKUP_ADMIN, PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'bkpuser'@'%'; 
 GRANT SELECT ON performance_schema.log_status TO 'bkpuser'@'%';
 GRANT SELECT ON performance_schema.keyring_component_status TO bkpuser@'%';
 FLUSH PRIVILEGES;
 
-#复制权限
+# copy permissions
 GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%'
 
-#pt主从数据一致性校验
+# pt-table-sync uage
+修复不一致数据 打印主从表信息不一致语句 --execute参数直接修复 生产不建议
+pt-table-sync --replicate=area.checksums h=127.0.0.1,u=lixl,p=lixl h=127.0.0.1,u=lixl,p=lixl --print
+./pt-table-sync --replicate=testa.checksums h=127.0.0.2,P=3308,u=root,p='C1234567890' h=127.0.0.2,P=3306,u=root,p='C1234567890' --print
+
+pt主从数据一致性校验
 pt-table-checksum --nocheck-replication-filters --no-check-binlog-format --replicate=area.checksums --create-replicate-table --databases=area --tables=haha h=127.0.0.1,u=lixl,p=lixl,P=3306
 ./pt-table-checksum --nocheck-replication-filters --no-check-binlog-format --replicate=testa.checksums --create-replicate-table --databases=testa  h=127.0.0.2,u=root,p=C1234567890,P=3308
 
 
-#修复不一致数据 打印主从表信息不一致语句 --execute参数直接修复 生产不建议
-pt-table-sync --replicate=area.checksums h=127.0.0.1,u=lixl,p=lixl h=127.0.0.1,u=lixl,p=lixl --print
-./pt-table-sync --replicate=testa.checksums h=127.0.0.2,P=3308,u=root,p='C1234567890' h=127.0.0.2,P=3306,u=root,p='C1234567890' --print
-
-#修复主从错误 error-numbers报错编码
-#注意、此工具可以修复io sql线程均为yes状态、但是不能彻底恢复、通过校验数据完整性需要手工修复
+# pt-slave-restart uage
+修复主从错误 error-numbers报错编码
+注意、此工具可以修复io sql线程均为yes状态、但是不能彻底恢复、通过校验数据完整性需要手工修复
 pt-slave-restart --user=root --password='q1234567890' --socket=/data/mysql8/socket/mysql.sock --error-numbers=1062
 ./pt-slave-restart --user=root --password='C1234567890' --socket=/data/mysql/mysql_sock/mysql.sock --error-numbers=1050
 
-#主从延迟监控 在主库上创建后台update进程
+# pt-heartbeat uage
+主从延迟监控 在主库上创建后台update进程
 pt-heartbeat -ulixl -plixl -D area --create-table --update --daemonize
 
-#server-id指向主库 其他从库 --interval 1s
+#
+server-id指向主库 其他从库 --interval 1s
 pt-heartbeat -ulixl -plixl -D area --table=heartbeat --master-server-id=1  --monitor -h 127.0.0.1 --interval=1
 
-#在线ddl
+#online ddl
 pt-online-schema-change --user=lixl --password=lixl --host=127.0.0.1 --alter="modify column comn decimal(8,2)" D=jobdata,t=emp --execute --nocheck-replication-filters
 ALTER TABLE `test11` modify COLUMN  `ucid` bigint(20) NOT NULL DEFAULT 0 COMMENT '线索ucid';
 ALTER TABLE li_pb_input_item MODIFY COLUMN READONLY VARCHAR(12) NOT NULL AFTER id
@@ -222,7 +241,7 @@ gh-ost \
 
 -- pt-online-schema-change --user=percona --password=percona --host=127.0.0.2 --port=3308 --alter="modify column ROWVERSION decimal(8,2)" D=partition_1,t=ats_choudan_tmp --execute --dry-run --nocheck-replication-filters
 
-#添加主键id自增无符号
+#Add the primary key id to add unsymbolized
 ALTER TABLE pay_detail_copy_1 ADD COLUMN id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
 
 alter table _cps_approve_info_del add column t2 varchar(12)
@@ -245,7 +264,7 @@ INSTALL PLUGIN clone SONAME 'mysql_clone.so';
 
 select plugin_name,plugin_status from information_schema.plugins where plugin_name like 'clone';
 
-#本地克隆
+#local clones
 mysql> CREATE USER clone_user@'%' IDENTIFIED by 'password';
 mysql> GRANT BACKUP_ADMIN ON *.* TO 'clone_user';  # BACKUP_ADMIN是MySQL8.0 才有的备份锁的权限
 
@@ -253,10 +272,10 @@ mysql> GRANT BACKUP_ADMIN ON *.* TO 'clone_user';  # BACKUP_ADMIN是MySQL8.0 才
 mysql -uclone_user -ppassword -S /tmp/mysql3008.sock
 mysql> CLONE LOCAL DATA DIRECTORY = '/fander/clone_dir';
 
-#捐赠者
+#Donor
 CREATE USER clone_user@'127.0.0.2' IDENTIFIED by 'P001';
 GRANT BACKUP_ADMIN ON *.* TO 'clone_user'@'127.0.0.2';  # BACKUP_ADMIN是MySQL8.0 才有的备份锁的权限
-#接受者
+#Recipient
 CREATE USER clone_user@'127.0.0.2' IDENTIFIED by 'P001';
 GRANT CLONE_ADMIN ON *.* TO 'clone_user'@'127.0.0.2';
 
@@ -295,7 +314,7 @@ SELECT COUNT(1) FROM llfinanceinterfaceimp
 GRANT REPLICATION SLAVE, REPLICATION CLIENT, SUPER ON *.* TO 'armoto'@'%';
 GRANT SELECT ON `bjfinance`.* TO 'armoto'@'%';
 
-#mysql8.0.26安装
+#mysql8.0.26 install
 #初始化
 /opt/mysql-8.0.26/bin/mysqld --defaults-file=/etc/my.cnf.d/my.cnf --initialize --user=mysql
 
@@ -314,7 +333,9 @@ port = 3307
 symbolic-links=0
 lower_case_table_names=1
 binlog_expire_logs_seconds=604800 `7天：秒数为单位 Mysql8.0` 5.7 expire_logs_days
-# 清理binlog 1.清理全部binlog除了此binlog：purge binary logs to 'mysql-bin.000136';2.清理指定时间前的binlog：purge binary logs before '2017-05-01 13:09:51';
+# Cleanup binlog 
+1.清理全部binlog除了此binlog：purge binary logs to 'mysql-bin.000136';
+2.清理指定时间前的binlog：purge binary logs before '2017-05-01 13:09:51';
 log_error = /opt/mysql-3307/log/mysql-error.log
 #innodb_force_recovery = 0
 #sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
