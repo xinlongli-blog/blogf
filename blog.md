@@ -1008,6 +1008,7 @@ show variables where variable_name in ('innodb_buffer_pool_size','innodb_log_buf
  
  
 docker run pmm
+```sql
  docker run \
 --rm \
 --name pmm-client \
@@ -1027,9 +1028,9 @@ pmm-admin add mysql --username pmm --password pass mysql-127.0.0.1 127.0.0.1:330
 pmm
 INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_mr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_127.0.0.1",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
 INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_hr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_127.0.0.1",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
+```
 
-
-MSSQL
+MSSQL：
 ```sql
 -查看存储包含的表
 select distinct object_name(id) from syscomments where id in
@@ -1072,7 +1073,7 @@ CROSS APPLY sys.dm_exec_sql_text(er.sql_handle) AS st
 ```
 
 
-nginx
+nginx：
 nginx1.20安装
 
 tar -zxvf nginx-1.20.1.tar.gz
@@ -1105,7 +1106,7 @@ firewall-cmd --zone=public --add-port=8080/tcp --permanent
 firewall-cmd --reload
 firewall-cmd --query-port=9090/tcp
 
-PG14安装
+PG14安装：
 ```sql
 -- 下载源码包 
 wget https://ftp.postgresql.org/pub/source/v14.2/data/data/postgresql-14.2.tar.gz --no-check-certificate 
@@ -1289,12 +1290,9 @@ STOP GROUP_REPLICATION;
 
 ```
 
-停止所有的容器
-docker stop $(docker ps -aq)
-删除所有的容器
-docker rm $(docker ps -aq)
-删除所有的镜像
-docker rmi $(docker images -q)
+停止所有的容器：docker stop $(docker ps -aq)
+删除所有的容器：docker rm $(docker ps -aq)
+删除所有的镜像：docker rmi $(docker images -q)
 
 Consolas, 'Courier New', monospace#vscode 默认字体
 
@@ -1321,14 +1319,14 @@ Consolas, 'Courier New', monospace#vscode 默认字体
 （单位是字节）。
 ```
 
-#解决鼎甲原生xtrabackup版本兼容问题所产生依赖问题
+解决鼎甲原生xtrabackup版本兼容问题所产生依赖问题
+```sql
 鼎甲8.0还原 取相应版本的xtrabackup（backup）或者 xbstream（restore）
 还原：鼎甲需映射 xbstream -> xbstream-8.0 鼎甲取参(xbstream-8.0),需新版copy，最终应用是xbstream 需做 ln -s
 备份：新版copy(xtrabackup-8.0)到bin目录，需映射 xbstream -> xtrabackup-8.0;
 5.7保持 xbstream -> xtrabackup-8.0 即可。
 undo参数初始化后调整参数有异常，需删掉undo tablespace，可直接删除/data 空间
 
-```sql
 
 [postgres@localhost ~]   tar xf percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17.tar.gz
 [postgres@localhost ~]   cd percona-xtrabackup-8.0.28-21-Linux-x86_64.glibc2.17/
@@ -1831,10 +1829,12 @@ grant select on mysql.proc to zhenxi1@'%';
 8.0版本之后，去掉了mysql.proc，所以这种方法，不再有效，一种可替代的方案是，授予该账号对所有库的select权限。
 grant select on *.* to zhenxi1@'%'
 
-授予用户对所有库的select权限，范围太广了，所以mysql从8.0.20开始增加了show_routine权限，解决这个问题：
-GRANT show_routine on *.* TO 'zhenxi1'@'%'
-https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_show-routine
-需要注意的是show_routine是一个global privilege，需要在全局授予，也即*.*，不能在库级别授予，否则，将会报如下错误：ERROR 1221 (HY000): Incorrect usage of DB GRANT and GLOBAL PRIVILEGES
+_授予用户对所有库的select权限，范围太广了，所以mysql从8.0.20开始增加了show_routine权限，_
+_解决这个问题：_
+_GRANT show_routine on *.* TO 'zhenxi1'@'%'_
+_https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_show-routine_
+_需要注意的是show_routine是一个global privilege，需要在全局授予，也即*.*，不能在库级别授予，_
+_否则，将会报如下错误：ERROR 1221 (HY000): Incorrect usage of DB GRANT and GLOBAL PRIVILEGES_
 
 
 CREATE USER 'exporter'@'%' IDENTIFIED BY 'P001!' WITH MAX_USER_CONNECTIONS 3;
@@ -1843,7 +1843,7 @@ GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%';
 GRANT SELECT, PROCESS, SUPER, REPLICATION CLIENT ON *.* TO 'exporter'@'%' WITH MAX_USER_CONNECTIONS 3;
 
 
-
+```bash
 su - mysql
 currdt=`date +%Y%m%d_%H%M%S`
 echo "$currdt" > /tmp/currdt_tmp.txt
@@ -1988,8 +1988,10 @@ perf top -p $mpid
 
 perf record -a -g -F 1000 -p $mpid -o pdata_2.dat
 perf report -i pdata_2.dat
+```
 
 诊断:
+```bash
 • top 主机负载情况
 • dmesg | tail 是否存在oom-killer 或 tcp drop等错误信息
 • vmstat 1 检查r、free、si、so、us, sy, id, wa, st列
@@ -1999,6 +2001,7 @@ perf report -i pdata_2.dat
 • free -m 检查内存使用情况
 • sar -n DEV 1 检查网络吞吐量
 • sar -n TCP,ETCP 1 检查tcp连接情况active/s, passive/s, retrans/s 
+```
 
 SELECT t.table_schema, t.table_name FROM information_schema.tables t
 LEFT JOIN information_schema.table_constraints c
@@ -2014,6 +2017,7 @@ information_schema.INNODB_LOCK_WAITS a
  INNER JOIN information_schema.PROCESSLIST d ON c.trx_mysql_thread_id=d.ID ;
 
 gh-ost丢数据原因:
+```bash
 应该和两阶段提交有关，两阶段提交先写redo log设置prepare阶段，再写binlog，最后将redo log设置为commit状态。
 在写完binlog，没标记redo log commit状态的时候，启动gh-ost，完成binlog监听，select最大最小边界值，就会出现丢数据。
 和主从同步关系应该不大。即使没有从库，也会丢数据的。  
@@ -2021,7 +2025,7 @@ gh-ost丢数据原因:
 --然而，在某些情况下，如果在 binlog 中的事务已经被标记为提交，但是在 gh-ost 启动前，
 --该事务的 binlog 还未被读取和应用，那么在执行完 gh-ost 后，这些事务就会被遗漏，导致数据丢失。
 不过加共享锁，确实可以解决这个问题。
-
+```
 
 没有使用半同步也存在这种问题，sync阶段binlog落盘到commit阶段释放锁资源，这个时间差内的数据都存在上面问题，只是半同步放大这种问题
 
@@ -2030,6 +2034,7 @@ powershell .\bcp_queryout.ps1 -fileList "F_CUSTOM:F_CUSTOM" -src_server 127.0.0.
 
 
 查询slow_log表中每天第一个慢查询的 start_time\query_time
+```sql
 SELECT * FROM
 (
 SELECT 
@@ -2041,7 +2046,7 @@ FROM
 from mysql.slow_log where start_time >= '2024-03-24' order by start_time,query_time desc) a
 ,(SELECT @rn=0, @start_day=0) b
 )a WHERE rn <= 5
-
+```
 
 mysql5.7 row_number 
 ```sql
@@ -2309,6 +2314,8 @@ SET ROLE daily_user; CALL daily_schema.i(); reset role;
 select * from users
 ```
 
+Redo Log 和 Binlog：
+```bash
 Redo Log 的持久化：
 在 2PC 的准备阶段，参与者会将 PREPARE 记录写入 redo log buffer，并通过 write 操作将数据写入到 redo log 文件的 page cache 中。
 执行 fsync 操作后，PREPARE 记录会真正持久化到磁盘。这保证了即使系统崩溃，准备状态的事务也不会丢失，并能够正确地处理后续的 COMMIT 或 ROLLBACK 操作。
@@ -2316,7 +2323,7 @@ Redo Log 的持久化：
 Binlog 的持久化：
 在 2PC 的提交阶段，参与者会将 COMMIT 记录写入 redo log，并随后将 COMMIT 事件记录到 binlog 中。
 fsync 操作确保 redo log 中的 COMMIT 记录被持久化到磁盘，并在 binlog 中记录 COMMIT 事件，表示事务已完成。
-
+```
 
 MySQL DDL 的原理简析
 ```sql
@@ -2478,6 +2485,8 @@ echo "LD_PRELOAD=libjemalloc.so" >>/etc/sysconfig/mysql
 
 最后重启mysql
 ```
+
+```bash
 ubuntu  systemctl 禁止分页:
 Bash (~/.bashrc 或 ~/.bash_profile):
 bash
@@ -2529,9 +2538,9 @@ SELECT
   to_timestamp(commentedon / 1000) AS readable_time
 FROM 
   changestatuscomments WHERE changeid = 3183 or changeid = 3180;
+```bash
 
-
---变更详细
+变更详细:
 ```sql
 --------------------------------------------------------------------------------------
 function plan1需要
@@ -2759,15 +2768,16 @@ GROUP BY c.changeid
 ORDER BY c.changeid DESC;
 ```
 
-
+```bash
 innodb_max_dirty_pages_pct = 0 #设置为 0，表示禁用脏页的使用，即在页面变为脏页之前，InnoDB 会将缓冲池中的数据刷新到磁盘。
 innodb_fast_shutdown = 0 #表示 InnoDB 会进行更加彻底的关机，确保所有脏页都写入磁盘，所有内部数据结构都被清理。
+```
 
 https://kkjiasu.top/api/v1/client/subscribe?token=9fcc82f52c98c4d480a0eb2815048712
 
 https://cpdd.one/sub?token=6ddcc2d3e9c9d089ea63e066c4f3f4d6
 
-
+```sql
 SELECT
 *
 FROM sys.procedures s
@@ -2793,11 +2803,12 @@ mysql-js> dba.stopSandboxInstance(3307)   // 停止
 
 删除实例（需先停止）
 mysql-js> dba.deleteSandboxInstance(3307)
+```sql
 
-
-systemctl命令tab自动补全
+systemctl命令tab自动补全：
 yum install -y bash-completion
 
+---
 
 尝试使用 gdb 获取锁等待信息
 ps aux | grep 端口号，找出mysqld进程号 pid，pstack pid > stack.log
@@ -2817,9 +2828,11 @@ thread 3
              --explicit_defaults_for_timestamp=1 &
 			 
  
+ ```sql
 1.复制.ibd文件以来，该表一定不能删除或截断，因为这样做会更改存储在表空间中的表ID。
 2.发出以下ALTER TABLE语句以删除当前.ibd文件：
 ALTER TABLE tbl_name DISCARD TABLESPACE;
 3.将备份.ibd文件复制到正确的数据库目录。
 4.发出以下ALTER TABLE语句，告诉InnoDB您将新 .ibd文件用于表：
 ALTER TABLE tbl_name IMPORT TABLESPACE;
+```
