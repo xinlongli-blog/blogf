@@ -468,6 +468,8 @@ laster DROP database t
 
 ```
 
+
+```bash
 如果记录gtid 导入数据会报错、需清空该参数GLOBAL.GTID_EXECUTED 需reset master即可。
 ERROR 3546 (HY000) at line 26: @@GLOBAL.GTID_PURGED cannot be changed: the added gtid set must not overlap with @@GLOBAL.GTID_EXECUTED
 SELECT @@GLOBAL.GTID_EXECUTED
@@ -729,7 +731,7 @@ max_allowed_packet = 20M
 binlog_cache_size=4M
 tmp_table_size = 256M
 max_heap_table_size = 256M
-
+```
 
 ./home/lixl/soft/percona-xtrabackup-2.4.21-Linux-x86_64.glibc2.12/bin/innobackupex
 
@@ -804,6 +806,7 @@ docker inspect pmm-server_data
 
 ```
 
+```bash
 /root/mysqld_exporter/mysqld_exporter --web.listen-address=0.0.0.0:9104 --config.my-cnf /etc/my.cnf --collect.slave_status --collect.slave_hosts --log.level=error --collect.info_schema.processlist --collect.info_schema.innodb_metrics --collect.info_schema.innodb_tablespaces --collect.info_schema.innodb_cmp --collect.info_schema.innodb_cmpmem
 
 firewall-cmd --zone=public --add-port=9093/tcp --permanent
@@ -959,7 +962,7 @@ kill -15 $(ps -ef|grep etcd | awk '{ print $2}' | tail -n +2)
 kill -9 $(ps -ef|grep docker | awk '{ print $2}' | tail -n +2)
 
 kill -9 $(ps -ef|grep awx | awk '{ print $2}' | tail -n +2)
-
+```
 
  select * from sys.dm_tran_session_transactions; --查看当前运行的事务
  
@@ -2803,7 +2806,7 @@ mysql-js> dba.stopSandboxInstance(3307)   // 停止
 
 删除实例（需先停止）
 mysql-js> dba.deleteSandboxInstance(3307)
-```sql
+```
 
 systemctl命令tab自动补全：
 yum install -y bash-completion
@@ -2828,7 +2831,7 @@ thread 3
              --explicit_defaults_for_timestamp=1 &
 			 
  
- ```sql
+```sql
 1.复制.ibd文件以来，该表一定不能删除或截断，因为这样做会更改存储在表空间中的表ID。
 2.发出以下ALTER TABLE语句以删除当前.ibd文件：
 ALTER TABLE tbl_name DISCARD TABLESPACE;
