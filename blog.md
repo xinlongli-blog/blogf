@@ -1,13 +1,4 @@
---20220217
-192.168.100.28
-P20_LifeExt_to_P90_LifeCIRC
-SHSQLP20LIFEEXT_SHSQLP30_LIFEMIR
-SHSQLP20_LIFEEXT_P30_LIFEDUP
-
-192.168.100.32
-P20_LifeExt-100_216_LifeExt
-p20_LifeExt_to_249_248_LifeExt
-P20_LifeExt-100_216_TYCX_LifeExt stop
+20220217
 
 #打开等待事件采集器配置项开关，需要修改配置表中对应的采集器配置项
 update setup_instruments set enabled ='yes',timed='yes' where name like 'wait%';
@@ -16,7 +7,7 @@ update setup_instruments set enabled ='yes',timed='yes' where name like 'wait%';
 update setup_consumers set enabled ='yes' where name like '%wait%';
 
 #导出备份
-mysqldump -h192.168.88.132 -ulixl -p --single-transaction --skip-opt --databases bioinfo --triggers --routines --events --master-data=2 --delete-master-logs --add-drop-database --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --log-error=/root/bioinfo_error.txt > /root/bioinfo_backup_20220615.sql
+mysqldump -h127.0.0.1 -ulixl -p --single-transaction --skip-opt --databases bioinfo --triggers --routines --events --master-data=2 --delete-master-logs --add-drop-database --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --log-error=/root/bioinfo_error.txt > /root/bioinfo_backup_20220615.sql
 
 #导入数据
 1：mysql -uroot -p < /root/bioinfo_backup_20220615.sql
@@ -26,8 +17,8 @@ MySQL [(none)]> source /root/bioinfo_backup_20220615.sql
 #截取position位置并导出sql
 /usr/local/mysql/bin/mysqlbinlog  --start-position="486" /usr/local/mysql/data/mysql-bin.000138 >/138.sql
 
-mysql -ulixl -p -e "GRANT REPLICATION SLAVE ON *.* TO 'monitor'@'%' IDENTIFIED BY '2&Ru@bbMT';"
-alter user 'monitor'@'localhost' identified by '2&Ru@bbMT';
+mysql -ulixl -p -e "GRANT REPLICATION SLAVE ON *.* TO 'monitor'@'%' IDENTIFIED BY '2P001';"
+alter user 'monitor'@'localhost' identified by '2P001';
 
 CHANGE MASTER TO MASTER_LOG_FILE='mysql-bin.000004',MASTER_LOG_POS=154;
 #从库回放sql
@@ -72,37 +63,37 @@ CREATE DATABASE `Test_database` CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_0900_ai
 
 grant all on lis.* to 'us_lis'@'%';
 
-create user 'repl'@'%' IDENTIFIED BY '2&Ru@bbMT';
+create user 'repl'@'%' IDENTIFIED BY '2P001';
 GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';
 change master to master_host='17.16.10.129' ,master_user='repl',master_password='repl',master_auto_position=1;
 ALTER USER 'repl'@'%' IDENTIFIED WITH 'mysql_native_password' BY 'repl';
 
 change master to master_host='17.16.10.131' ,master_user='orchestrator',master_password='Orc@1234',master_auto_position=1;
 ALTER USER 'orchestrator'@'%' IDENTIFIED WITH 'mysql_native_password' BY 'Orc@1234';
-CREATE USER 'pmm'@'127.0.0.1' IDENTIFIED BY '2&Ru@bbMT' WITH MAX_USER_CONNECTIONS 10;
+CREATE USER 'pmm'@'127.0.0.1' IDENTIFIED BY '2P001' WITH MAX_USER_CONNECTIONS 10;
 GRANT SELECT, PROCESS, REPLICATION CLIENT, RELOAD ON *.* TO 'pmm'@'127.0.0.1';
 
 
-CREATE USER pmm WITH SUPERUSER ENCRYPTED PASSWORD '2&Ru@bbMT';
+CREATE USER pmm WITH SUPERUSER ENCRYPTED PASSWORD '2P001';
 
 
-create user 'root'@'%' IDENTIFIED BY 'qwerty1!';
+create user 'root'@'%' IDENTIFIED BY 'q1234567890';
 grant all privileges on *.* to root@'%' with grant option; 
 revoke shutdown on *.* from 'root'@'%';
 FLUSH PRIVILEGES; 
-alter user 'root'@'localhost' identified by 'Cmbjx3ccwtn9';
-alter user 'root'@'localhost' identified by 'P@ssw0rd001!';
+alter user 'root'@'localhost' identified by 'C1234567890';
+alter user 'root'@'localhost' identified by 'P001!';
 alter user 'root'@'localhost' identified by 'superpercona';
-update user set authentication_string=password('Cmbjx3ccwtn9') where user='root' and host='localhost'; --5.7.27
-Cmbjx3ccwtn9
+update user set authentication_string=password('C1234567890') where user='root' and host='localhost'; --5.7.27
+C1234567890
 
-alter user 'root'@'%' identified by 'qwerty1!';
+alter user 'root'@'%' identified by 'q1234567890';
 
 CREATE USER 'pmm'@'%' IDENTIFIED BY 'pass' WITH MAX_USER_CONNECTIONS 10;
 GRANT SELECT, PROCESS, REPLICATION CLIENT, RELOAD ON *.* TO 'pmm'@'%';
 FLUSH PRIVILEGES;
 
-create user 'csdev'@'%' IDENTIFIED BY '2&Ru@bbMT';
+create user 'csdev'@'%' IDENTIFIED BY '2P001';
 GRANT ALL PRIVILEGES ON `csdev`.* TO 'csdev@'%';
 
 #某张表只读指定字段 update类似 grant update(empno,job) on testg.emp to readonly;
@@ -162,7 +153,7 @@ revoke show_routine on *.* from 'us_testg'@'%'
 revoke ALL privileges ON *.* from `us_testg`@`%`
 
 #备份权限5.7x
-alter user 'root'@'localhost' identified by 'P@ssw0rd001!';
+alter user 'root'@'localhost' identified by 'P001!';
 CREATE USER 'bkpuser'@'%' IDENTIFIED BY 'P3QaaQPhby)D';
 GRANT RELOAD, LOCK TABLES, PROCESS, REPLICATION CLIENT ON *.* TO'bkpuser'@'%';
 FLUSH PRIVILEGES;
@@ -178,27 +169,27 @@ FLUSH PRIVILEGES;
 GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%'
 
 #pt主从数据一致性校验
-pt-table-checksum --nocheck-replication-filters --no-check-binlog-format --replicate=area.checksums --create-replicate-table --databases=area --tables=haha h=192.168.88.129,u=lixl,p=lixl,P=3306
-./pt-table-checksum --nocheck-replication-filters --no-check-binlog-format --replicate=testa.checksums --create-replicate-table --databases=testa  h=172.18.100.59,u=root,p=Cmbjx3ccwtn9,P=3308
+pt-table-checksum --nocheck-replication-filters --no-check-binlog-format --replicate=area.checksums --create-replicate-table --databases=area --tables=haha h=127.0.0.1,u=lixl,p=lixl,P=3306
+./pt-table-checksum --nocheck-replication-filters --no-check-binlog-format --replicate=testa.checksums --create-replicate-table --databases=testa  h=127.0.0.2,u=root,p=C1234567890,P=3308
 
 
 #修复不一致数据 打印主从表信息不一致语句 --execute参数直接修复 生产不建议
-pt-table-sync --replicate=area.checksums h=192.168.88.129,u=lixl,p=lixl h=192.168.88.129,u=lixl,p=lixl --print
-./pt-table-sync --replicate=testa.checksums h=172.18.100.59,P=3308,u=root,p='Cmbjx3ccwtn9' h=172.18.100.74,P=3306,u=root,p='Cmbjx3ccwtn9' --print
+pt-table-sync --replicate=area.checksums h=127.0.0.1,u=lixl,p=lixl h=127.0.0.1,u=lixl,p=lixl --print
+./pt-table-sync --replicate=testa.checksums h=127.0.0.2,P=3308,u=root,p='C1234567890' h=127.0.0.2,P=3306,u=root,p='C1234567890' --print
 
 #修复主从错误 error-numbers报错编码
 #注意、此工具可以修复io sql线程均为yes状态、但是不能彻底恢复、通过校验数据完整性需要手工修复
-pt-slave-restart --user=root --password='qwerty1!' --socket=/data/mysql8/socket/mysql.sock --error-numbers=1062
-./pt-slave-restart --user=root --password='Cmbjx3ccwtn9' --socket=/data/mysql/mysql_sock/mysql.sock --error-numbers=1050
+pt-slave-restart --user=root --password='q1234567890' --socket=/data/mysql8/socket/mysql.sock --error-numbers=1062
+./pt-slave-restart --user=root --password='C1234567890' --socket=/data/mysql/mysql_sock/mysql.sock --error-numbers=1050
 
 #主从延迟监控 在主库上创建后台update进程
 pt-heartbeat -ulixl -plixl -D area --create-table --update --daemonize
 
 #server-id指向主库 其他从库 --interval 1s
-pt-heartbeat -ulixl -plixl -D area --table=heartbeat --master-server-id=1  --monitor -h 192.168.88.133 --interval=1
+pt-heartbeat -ulixl -plixl -D area --table=heartbeat --master-server-id=1  --monitor -h 127.0.0.1 --interval=1
 
 #在线ddl
-pt-online-schema-change --user=lixl --password=lixl --host=192.168.88.129 --alter="modify column comn decimal(8,2)" D=jobdata,t=emp --execute --nocheck-replication-filters
+pt-online-schema-change --user=lixl --password=lixl --host=127.0.0.1 --alter="modify column comn decimal(8,2)" D=jobdata,t=emp --execute --nocheck-replication-filters
 ALTER TABLE `test11` modify COLUMN  `ucid` bigint(20) NOT NULL DEFAULT 0 COMMENT '线索ucid';
 ALTER TABLE li_pb_input_item MODIFY COLUMN READONLY VARCHAR(12) NOT NULL AFTER id
 ALTER TABLE li_pb_input_item RENAME TO li_pb_input_item_up
@@ -209,8 +200,8 @@ gh-ost \
 --critical-load-interval-millis=5000 \
 --chunk-size=1000 \
 --user="root" \
---password='Cmbjx3ccwtn9' \
---host='172.18.100.74' \
+--password='C1234567890' \
+--host='127.0.0.2' \
 --port=3306 \
 --database="pos_payment" \
 --table="t_payment_transaction_history" \
@@ -229,7 +220,7 @@ gh-ost \
 --timestamp-old-table \
 --execute 2>&1 | tee /tmp/t_payment_transaction_history.log
 
--- pt-online-schema-change --user=percona --password=percona --host=172.18.100.59 --port=3308 --alter="modify column ROWVERSION decimal(8,2)" D=partition_1,t=ats_choudan_tmp --execute --dry-run --nocheck-replication-filters
+-- pt-online-schema-change --user=percona --password=percona --host=127.0.0.2 --port=3308 --alter="modify column ROWVERSION decimal(8,2)" D=partition_1,t=ats_choudan_tmp --execute --dry-run --nocheck-replication-filters
 
 #添加主键id自增无符号
 ALTER TABLE pay_detail_copy_1 ADD COLUMN id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
@@ -263,29 +254,29 @@ mysql -uclone_user -ppassword -S /tmp/mysql3008.sock
 mysql> CLONE LOCAL DATA DIRECTORY = '/fander/clone_dir';
 
 #捐赠者
-CREATE USER clone_user@'172.18.100.59' IDENTIFIED by 'P@ssw0rd001';
-GRANT BACKUP_ADMIN ON *.* TO 'clone_user'@'172.18.100.74';  # BACKUP_ADMIN是MySQL8.0 才有的备份锁的权限
+CREATE USER clone_user@'127.0.0.2' IDENTIFIED by 'P001';
+GRANT BACKUP_ADMIN ON *.* TO 'clone_user'@'127.0.0.2';  # BACKUP_ADMIN是MySQL8.0 才有的备份锁的权限
 #接受者
-CREATE USER clone_user@'172.18.100.74' IDENTIFIED by 'P@ssw0rd001';
-GRANT CLONE_ADMIN ON *.* TO 'clone_user'@'172.18.100.59';
+CREATE USER clone_user@'127.0.0.2' IDENTIFIED by 'P001';
+GRANT CLONE_ADMIN ON *.* TO 'clone_user'@'127.0.0.2';
 
-set global clone_valid_donor_list='172.18.100.59:3308' # 将捐赠者 MySQL 服务器实例的主机地址添加到 clone_valid_donor_list 变量设置中
-CLONE INSTANCE FROM clone_user@'172.18.100.59':3308 IDENTIFIED BY 'P@ssw0rd001';
+set global clone_valid_donor_list='127.0.0.2:3308' # 将捐赠者 MySQL 服务器实例的主机地址添加到 clone_valid_donor_list 变量设置中
+CLONE INSTANCE FROM clone_user@'127.0.0.2':3308 IDENTIFIED BY 'P001';
 
 SELECT STAGE, STATE, END_TIME FROM performance_schema.clone_progress;	# `克隆流程`
 SELECT STATE FROM performance_schema.clone_status;	# `克隆进度`
 SELECT STATE, ERROR_NO, ERROR_MESSAGE FROM performance_schema.clone_status; # `克隆是否有问题`
 show global status like 'Com_clone';  # `捐赠者` 每次+1，`接受者` 0
 
-create user repl@'%' identified WITH 'mysql_native_password' by 'P@ssw0rd001';
+create user repl@'%' identified WITH 'mysql_native_password' by 'P001';
 GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'repl'@'%'; 
 
 stop replica; reset replica;
 
 CHANGE MASTER TO
-  MASTER_HOST='172.18.100.59',
+  MASTER_HOST='127.0.0.2',
   MASTER_USER='repl',
-  MASTER_PASSWORD='P@ssw0rd001',
+  MASTER_PASSWORD='P001',
   MASTER_PORT=3308,
   MASTER_AUTO_POSITION=1;
 
@@ -358,30 +349,6 @@ $bindir/mysqld_safe /--defaults-file="$conf" 增加 / --datadir="$datadir" --pid
 support-files/mysql.server start	 
 	
 #月度维护(服务器密码
-shsqlp10bk\administrator ng.life59
-shsqlp30\administrator 
-shsqlp50\administrator ng.life59
-shsqlp60\administrator
-shsqlp70\administrator ng.life59
-shsqlp80\administrator ng.life59
-shsqlp90\administrator ng.life59
-shsqlp100\administrator ng.life
-shsqlp120\administrator ng.life
-
-shiisp10\administrator ng.life59
-C:\project\Seeyon\A8\ApacheJetspeed\work 删除
-shiisp30\administrator ng.life59
-shiisp40\administrator ng.life59
-Shygz\administrator ng.life59
-Shdb2\administrator Unitedplaza37
-shdbbk\administrator ng.life59
-shdtg\administrator ng.life59
-shhr\administrator ng.life59
-shibm\administrator ng.life59
-shprt1\administrator Unitedplaza37
-shrptp10\administrator ng.life59
-shwas3\administrator Unitedplaza37
-shwasp10\administrator Unitedplaza37
 
 #20220218
 
@@ -411,14 +378,14 @@ Create Table: CREATE TABLE `handler_table` (
 # GTID POSITION
 change master to master_host='10.67.33.136' ,master_user='repl',master_password='repl',master_auto_position=1;
 
-change master to master_host='172.18.100.194' ,master_user='repl',master_password='2&Ru@bbMT',master_auto_position=1;
+change master to master_host='127.0.0.2' ,master_user='repl',master_password='2P001',master_auto_position=1;
 
 58e6250d-356f-11ec-982c-000c29bb216a:1-6694556,
 612c68db-7da3-11ec-8daa-000c296e8b4d:7-76,
 b3972d82-5c69-11eb-a08e-525400b8eba7:19184702-19361245
 
 #位点
-change master to master_host='192.168.88.131',master_user='lixl',master_password='lixl',master_log_file='mysql-bin.000015',master_log_pos=194;
+change master to master_host='127.0.0.1',master_user='lixl',master_password='lixl',master_log_file='mysql-bin.000015',master_log_pos=194;
 
 
 log-bin   = /data/mysql-3306/data/mysql-bin
@@ -434,12 +401,12 @@ sync_binlog = 1
 innodb_flush_log_at_trx_commit=1
 
 #备份
-mysqldump -h192.168.99.41 -uroot -p --single-transaction --skip-opt --databases sign --triggers --routines --events --master-data=2 --delete-master-logs --add-drop-database --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --log-error=/root/sign_error.txt > /root/sign_backup_20220222.sql
+mysqldump -h127.0.0.1 -uroot -p --single-transaction --skip-opt --databases sign --triggers --routines --events --master-data=2 --delete-master-logs --add-drop-database --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --log-error=/root/sign_error.txt > /root/sign_backup_20220222.sql
 
-scp root@192.168.99.41:/root/sign_backup_20220222.sql /root/
+scp root@127.0.0.1:/root/sign_backup_20220222.sql /root/
 
 #恢复
-mysqldump -h192.168.99.53 -uroot -p </root/sign_backup_20220222.sql
+mysqldump -h127.0.0.1 -uroot -p </root/sign_backup_20220222.sql
 
 校验
 
@@ -447,15 +414,15 @@ mysqldump -h192.168.99.53 -uroot -p </root/sign_backup_20220222.sql
 show master status;
 #change主从
 change master to 
-master_host='192.168.99.41',
+master_host='127.0.0.1',
 master_user='root',
-master_password='Cmbjx3ccwtn9',
+master_password='C1234567890',
 master_log_file='mysql-bin.',
 master_log_pos=;
 
 start slave;
 show slave status\G;
-mysqldump -h192.168.99.41 -uroot -p --single-transaction --skip-opt --databases sign --triggers --routines --events --master-data=2 --delete-master-logs --add-drop-database --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --log-error=/root/sign_error.txt > /root/sign_backup_20220222.sql
+mysqldump -h127.0.0.1 -uroot -p --single-transaction --skip-opt --databases sign --triggers --routines --events --master-data=2 --delete-master-logs --add-drop-database --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --log-error=/root/sign_error.txt > /root/sign_backup_20220222.sql
 
 #mysqldump主动搭建
 select Heartbeat from slave_master_info
@@ -746,7 +713,7 @@ set @@global.gtid_purged='58e6250d-356f-11ec-982c-000c29bb216a:1-6694556,
 b3972d82-5c69-11eb-a08e-525400b8eba7:19184702-19361245,58e6250d-356f-11ec-982c-000c29bb216a:1-6694972';
 
 ./innobackupex --apply-log /data/mysql-3306/data/
-change master to master_host='192.168.88.129',master_port=3306,master_user='repl',master_password='repl',master_auto_position=1;
+change master to master_host='127.0.0.1',master_port=3306,master_user='repl',master_password='repl',master_auto_position=1;
 select * from performance_schema.replication_applier_status_by_worker\G;
 
 --no-create-info
@@ -905,9 +872,9 @@ firewall-cmd --zone=public --add-port=9093/tcp --permanent
 firewall-cmd --reload
 firewall-cmd --query-port=9093/tcp
 
-firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.111.160" drop'
+firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="127.0.0.1" drop'
 
-firewall-cmd --permanent --remove-rich-rule='rule family="ipv4" source address="192.168.111.160" drop'
+firewall-cmd --permanent --remove-rich-rule='rule family="ipv4" source address="127.0.0.1" drop'
 
 firewall-cmd --reload
 
@@ -1073,17 +1040,17 @@ P@ssword1f
 6.sqlserver备份脚本 备份疑惑 --BACKUP LOG [LifeCIRC] To disk='nul'
 7.sqlserver数据迁移注意事项
 8.监控告警服务器 --不清楚的服务器请教丁杰？？
-9.192.168.100.117 自动清理脚本
+9.127.0.0.1 自动清理脚本
 10.企业微信管理后台 --登陆操作 添加用户显示报警
 11.jenkins 发布失败--直接回滚吗
 12.企业微信群 输出警告信息 --详情
 13.云上数据库巡检 是否包含在zabbix上
 14.ar 邮件设置  --详情问供应商
 
-192.168.100.131_shcredit-app1 负责人
-192.168.100.165_shPayDB-主 负责人 是否为我维护
-192.168.100.166_shPayDB-从
-192.168.100.211 mysql 负责人 是否为我维护
+127.0.0.1_shcredit-app1 负责人
+127.0.0.1_shPayDB-主 负责人 是否为我维护
+127.0.0.1_shPayDB-从
+127.0.0.1 mysql 负责人 是否为我维护
 
 
 --架构升级
@@ -1195,7 +1162,7 @@ vrrp_instance QIANYUE_VIP {
         auth_pass 1111
     }
     virtual_ipaddress {
-        192.168.99.55
+        127.0.0.1
     }
     track_script {
         mysqlcheck
@@ -1290,7 +1257,7 @@ vrrp_instance QIANYUE_VIP {
         auth_pass 1111
     }
     virtual_ipaddress {
-        192.168.99.55
+        127.0.0.1
     }
     track_script {
         mysqlcheck
@@ -1307,7 +1274,7 @@ vrrp_instance QIANYUE_VIP {
 #接收者邮箱，多个以空格分隔
 contact=(1403687948@qq.com)
 #本机ip
-HOST_IP=192.168.88.129
+HOST_IP=127.0.0.1
 notify() {
 #邮件主题
     mailsubject="KEEPALIVED故障进行转移,$HOST_IP keepalived to be $1"
@@ -1316,7 +1283,7 @@ notify() {
     for receiver in ${contact[*]}
     do
    #发送邮件
-        echo ""$(date +'%F %T'): vrrp transition,192.168.88.129 keepalived changed" | mail -r 192.168.88.129 -s "KEEPALIVED故障进行转移" $receiver
+        echo ""$(date +'%F %T'): vrrp transition,127.0.0.1 keepalived changed" | mail -r 127.0.0.1 -s "KEEPALIVED故障进行转移" $receiver
     done
 }
 case $1 in
@@ -1335,14 +1302,14 @@ fault)
     ;;
 esac
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
-pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --server-address=192.168.88.129 --server-insecure-tls --server-username=admin --server-password=admin
-pmm-admin config --server-insecure-tls --server-url=https://admin:admin@192.168.88.129:443
+pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --server-address=127.0.0.1 --server-insecure-tls --server-username=admin --server-password=admin
+pmm-admin config --server-insecure-tls --server-url=https://admin:admin@127.0.0.1:443
 pmm-admin config --server-insecure-tls --server-url=https://admin:P@ssword12@127.0.0.1:443
 
 启动pmm-agent
 pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml
 --向PMM-Server服务添加linux主机监控
-pmm-admin config --server-insecure-tls --server-url=https://admin:admin@192.168.88.132:443
+pmm-admin config --server-insecure-tls --server-url=https://admin:admin@127.0.0.1:443
 
 
 #赢时胜每月脚本
@@ -1352,23 +1319,23 @@ update cs_sun  set FT7 = '000'  where FT7 = '0000'  and fywdate >= '20220601' an
 #sysbench压测OLTP
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #准备数据
-sysbench --db-driver=mysql --mysql-host=192.168.88.132 --mysql-port=3306 --mysql-user=lixl --mysql-password=lixl --mysql-db=sysbench --mysql-storage-engine=innodb --tables=5 --table-size=100000000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off prepare
+sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=lixl --mysql-password=lixl --mysql-db=sysbench --mysql-storage-engine=innodb --tables=5 --table-size=100000000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off prepare
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
-sysbench --db-driver=mysql --mysql-host=192.168.88.130 --mysql-port=3306 --mysql-user=lixl --mysql-password=lixl --mysql-db=sbtest --mysql-storage-engine=innodb --tables=5 --table-size=100000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off run
+sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=lixl --mysql-password=lixl --mysql-db=sbtest --mysql-storage-engine=innodb --tables=5 --table-size=100000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off run
 
-sysbench --db-driver=mysql --mysql-host=192.168.97.222 --mysql-port=3306 --mysql-user=us_hammer --mysql-password=us_hammer --mysql-db=tpcc --mysql-storage-engine=innodb --tables=3 --table-size=100000000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off prepare
-sysbench --db-driver=mysql --mysql-host=192.168.97.222 --mysql-port=3306 --mysql-user=us_hammer --mysql-password=us_hammer --mysql-db=tpcc --mysql-storage-engine=innodb --tables=5 --table-size=100000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off run
-sysbench --db-driver=mysql --mysql-host=172.18.100.59 --mysql-port=3308 --mysql-user=us_hammer --mysql-password=us_hammer --mysql-db=T --mysql-storage-engine=innodb --tables=5 --table-size=100000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off cleanup
+sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=us_hammer --mysql-password=us_hammer --mysql-db=tpcc --mysql-storage-engine=innodb --tables=3 --table-size=100000000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off prepare
+sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=us_hammer --mysql-password=us_hammer --mysql-db=tpcc --mysql-storage-engine=innodb --tables=5 --table-size=100000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off run
+sysbench --db-driver=mysql --mysql-host=127.0.0.2 --mysql-port=3308 --mysql-user=us_hammer --mysql-password=us_hammer --mysql-db=T --mysql-storage-engine=innodb --tables=5 --table-size=100000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off cleanup
 
-pt-heartbeat --user=root --ask-pass --host=172.18.100.74 --create-table -D heartbeat --interval=1 --update --replace --daemonize
+pt-heartbeat --user=root --ask-pass --host=127.0.0.2 --create-table -D heartbeat --interval=1 --update --replace --daemonize
 
-pt-heartbeat -D heartbeat --table=heartbeat --monitor --host=172.18.100.74 --user=root --ask-pass --master-server-id=1007457
+pt-heartbeat -D heartbeat --table=heartbeat --monitor --host=127.0.0.2 --user=root --ask-pass --master-server-id=1007457
 
-sysbench --db-driver=mysql --mysql-host=172.18.100.74 --mysql-port=3306 --mysql-user=us_test --mysql-password='2&Ru@bbMT' --mysql-db=test --mysql-storage-engine=innodb --tables=3 --table-size=10000000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off prepare
+sysbench --db-driver=mysql --mysql-host=127.0.0.2 --mysql-port=3306 --mysql-user=us_test --mysql-password='2P001' --mysql-db=test --mysql-storage-engine=innodb --tables=3 --table-size=10000000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off prepare
 
-sysbench --db-driver=mysql --mysql-host=172.18.100.74 --mysql-port=3306 --mysql-user=us_test --mysql-password='2&Ru@bbMT' --mysql-db=test --mysql-storage-engine=innodb --tables=3 --table-size=10000000 /usr/share/sysbench/oltp_update_non_index.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off run
+sysbench --db-driver=mysql --mysql-host=127.0.0.2 --mysql-port=3306 --mysql-user=us_test --mysql-password='2P001' --mysql-db=test --mysql-storage-engine=innodb --tables=3 --table-size=10000000 /usr/share/sysbench/oltp_update_non_index.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off run
 
-sysbench --db-driver=mysql --mysql-host=172.18.100.59 --mysql-port=3308 --mysql-user=us_hammer --mysql-password=us_hammer --mysql-db=T --mysql-storage-engine=innodb --tables=5 --table-size=100000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off cleanup
+sysbench --db-driver=mysql --mysql-host=127.0.0.2 --mysql-port=3308 --mysql-user=us_hammer --mysql-password=us_hammer --mysql-db=T --mysql-storage-engine=innodb --tables=5 --table-size=100000 /usr/share/sysbench/oltp_point_select.lua --forced-shutdown=1  --threads=16 --events=0 --time=60000000 --report-interval=1 --percentile=99 --db-ps-mode=disable --auto_inc=1 --mysql-ignore-errors=all --skip_trx=off cleanup
 
 4951c10a947d
 
@@ -1377,7 +1344,7 @@ sysbench --db-driver=mysql --mysql-host=172.18.100.59 --mysql-port=3308 --mysql-
 show variables where variable_name in ('innodb_buffer_pool_size','innodb_log_buffer_size','innodb_additional_mem_pool_size','key_buffer_size','query_cache_size');
 
 #mycat
- <readHost host="hostS1" url="jdbc:mysql://192.168.88.133:3306" user="lixl" password="lixl" />
+ <readHost host="hostS1" url="jdbc:mysql://127.0.0.1:3306" user="lixl" password="lixl" />
  TESTDB
  
  ------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1418,7 +1385,7 @@ printf '}\n'
 NAME=mysql
 count=$(netstat -ano | grep ":::3306" | grep "LISTEN" | wc -l)
 if [ ${count} -eq 0 ];then
-  echo "$(date +'%F %T'): mysql is fail,192.168.88.129" | mail -r 192.168.88.129 -s "mysql DOWN!!!" 1403687948@qq.com
+  echo "$(date +'%F %T'): mysql is fail,127.0.0.1" | mail -r 127.0.0.1 -s "mysql DOWN!!!" 1403687948@qq.com
   exit 9
  else
   echo "$(date +'%F %T'): mysql is running"
@@ -1585,7 +1552,7 @@ nohup $APP_NAME --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml >/de
 echo $!
 
 
-pmm-admin add mysql --username pmm --password pass mysql-192.168.88.129 192.168.88.129:3306
+pmm-admin add mysql --username pmm --password pass mysql-127.0.0.1 127.0.0.1:3306
 
 
 firewall-cmd --zone=public --add-port=8080/tcp --permanent
@@ -1665,10 +1632,10 @@ EOF
 
 
 stdprm
-192.168.100.28：
+127.0.0.1：
 AS400_to_P20_LifeMir20210913
 AS400_to_P30_LifeMir20191223
-192.168.100.32：
+127.0.0.1：
 AS400-100_216_LifeMir
 AS400-99_11_LifeMir
 AS400_to_100_98_LifeMir
@@ -1688,7 +1655,7 @@ ${MICROSOFT_JDBC_DRIVER_PATH}/sqljdbc4.jar
    /*+ mycat:createDataSource{
 "name":"master",
 "instanceType":"WRITE",
-"url":"jdbc:mysql://192.168.88.129:3306",
+"url":"jdbc:mysql://127.0.0.1:3306",
 "user":"lixl",
 "password":"lixl"
 } */;
@@ -1696,7 +1663,7 @@ ${MICROSOFT_JDBC_DRIVER_PATH}/sqljdbc4.jar
 /*+ mycat:createDataSource{
 "name":"slave",
 "instanceType":"READ",
-"url":"jdbc:mysql://192.168.88.133:3306",
+"url":"jdbc:mysql://127.0.0.1:3306",
 "user":"lixl",
 "password":"lixl"
 } */;
@@ -1751,13 +1718,13 @@ route:
 receivers:
 - name: 'wxwork'
   webhook_configs:
-  - url: 'http://192.168.100.222:10086/wxwork'
+  - url: 'http://127.0.0.1:10086/wxwork'
 - name: 'mail'
   webhook_configs:
-  - url: 'http://192.168.100.222:10086/mail'
+  - url: 'http://127.0.0.1:10086/mail'
 - name: 'collect'
   webhook_configs:
-  - url: 'http://192.168.100.222:10086/collect'
+  - url: 'http://127.0.0.1:10086/collect'
     send_resolved: false
 inhibit_rules:
   - source_match:
@@ -1985,8 +1952,8 @@ uptime | sed 's/user.*$//' | gawk '{print $NF}'
 
 
 #pmm
-INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_mr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_192.168.97.222",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
-INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_hr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_192.168.97.222",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
+INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_mr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_127.0.0.1",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.mr": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
+INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    VictoriaMetrics/lib/promscrape/scrapework.go:377        cannot scrape target "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process" ({agent_id="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",agent_type="postgres_exporter",instance="/agent_id/28a3a7b3-9f9f-4bb5-9d3c-176886a81d69",job="postgres_exporter_agent_id_28a3a7b3-9f9f-4bb5-9d3c-176886a81d69_hr",machine_id="/machine_id/93e6db90b4434ca88794808002b4cc48",node_id="/node_id/38a986ab-35d8-4e9b-8249-90c1560893d7",node_name="postgre",node_type="generic",service_id="/service_id/80c6ef90-7b68-402d-a37b-8436495493fd",service_name="postgresql_127.0.0.1",service_type="postgresql"}) 1 out of 1 times during -promscrape.suppressScrapeErrorsDelay=0s; the last error: cannot read data: cannot scrape "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": Get "http://127.0.0.1:42000/metrics?collect%5B%5D=custom_query.hr&collect%5B%5D=exporter&collect%5B%5D=standard.go&collect%5B%5D=standard.process": EOF  agentID=/agent_id/4449bfa5-3705-4f72-a22e-744d69431208 component=agent-process type=vm_agent
 
 #
 #tshark 简单使用
@@ -2002,25 +1969,25 @@ INFO[2023-06-16T10:14:50.836+08:00] 2023-06-16T02:14:50.836Z    warn    Victoria
 tshark -i ens160 -f 'tcp port 3306' -Y "mysql.query" -d tcp.port==3306,mysql -T fields -e frame.time -e ip.host -e mysql.query
 tshark -i ens160 -Y "mysql.query" -d tcp.port==3306,mysql -T fields -e frame.time -e ip.host -e mysql.query
 #抓包
-tshark -i ens33 -f 'tcp port 3306 and host 192.168.97.222'
+tshark -i ens33 -f 'tcp port 3306 and host 127.0.0.1'
 
 #MySQL
-tshark -i ens33 -f 'tcp port 3306 and host 192.168.97.222' /*三次握手*/ 
+tshark -i ens33 -f 'tcp port 3306 and host 127.0.0.1' /*三次握手*/ 
 tshark -i ens33 -f 'tcp port 3306' -Y "mysql.query" -d tcp.port==3306,mysql -T fields -e frame.time -e ip.src -e ip.dst -e mysql.query  /*抓SQL语句*/ 
 tshark -i ens33 -f 'tcp port 3306' -Y "mysql.query" -d tcp.port==3306,mysql -T fields -e frame.time -e ip.src -e ip.dst -e mysql.query
-tshark -i ens33 -d tcp.port==3306,mysql -f "host 192.168.97.222 and tcp port 3306" -T fields -e frame.time -e ip.host -e tcp.flags /*十进制*/
+tshark -i ens33 -d tcp.port==3306,mysql -f "host 127.0.0.1 and tcp port 3306" -T fields -e frame.time -e ip.host -e tcp.flags /*十进制*/
 tshark -i ens33 -d tcp.port==3306,mysql -Y 'mysql.query contains "SHOW"' -T fields -e ip.host -e mysql.query -e frame.time /*SQL语句基础上进行模糊过滤*/ 
 
 #postgres
-tshark -i ens33 -f 'tcp port 5432 and host 192.168.97.222'
+tshark -i ens33 -f 'tcp port 5432 and host 127.0.0.1'
 tshark -i ens33 -f 'tcp port 5432' -Y "pgsql.query" -d tcp.port==5432,pgsql -T fields -e frame.time -e ip.src -e ip.dst -e pgsql.query
-tshark -i ens33 -d tcp.port==5432,pgsql -f "host 192.168.97.222 and tcp port 5432" -T fields -e frame.time -e ip.host -e tcp.flags
+tshark -i ens33 -d tcp.port==5432,pgsql -f "host 127.0.0.1 and tcp port 5432" -T fields -e frame.time -e ip.host -e tcp.flags
 tshark -i ens33 -d tcp.port==5432,pgsql -Y 'pgsql.query contains "delete"' -T fields -e ip.host -e pgsql.query -e frame.time
 
 
 #proxysql
-INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,'172.18.100.194',3306);
-INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,'172.18.100.74',3306);
+INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,'127.0.0.2',3306);
+INSERT INTO mysql_servers(hostgroup_id,hostname,port) VALUES (1,'127.0.0.2',3306);
 
 #master monitor
 mysql -e "GRANT REPLICATION SLAVE ON *.* TO 'monitor'@'172.18.100.%' IDENTIFIED BY 'monitor';"
@@ -2154,8 +2121,8 @@ proxysql节点状态查询
 select hostgroup_id,hostname,port,status,max_replication_lag from runtime_mysql_servers;
 
 
-sysbench /usr/share/sysbench/oltp_common.lua --mysql-host=172.18.100.59 --mysql-port=3308 --mysql-user=us_hammer --mysql-password='2&Ru@bbMT' --mysql-db=hammer --tables=10 --table-size=1000000 --db-driver=mysql --report-interval=1 prepare
-sysbench --threads=50 /usr/share/sysbench/oltp_read_write.lua --table-size=1000000 --tables=10 --point_selects=2  --index_updates=2 --non_index_updates=1 --delete_inserts=1 --report-interval=1 --mysql-host=172.18.100.59 --mysql-port=3308 --mysql-user=us_hammer --mysql-password='2&Ru@bbMT' --mysql-db=hammer --time=120  run
+sysbench /usr/share/sysbench/oltp_common.lua --mysql-host=127.0.0.2 --mysql-port=3308 --mysql-user=us_hammer --mysql-password='2P001' --mysql-db=hammer --tables=10 --table-size=1000000 --db-driver=mysql --report-interval=1 prepare
+sysbench --threads=50 /usr/share/sysbench/oltp_read_write.lua --table-size=1000000 --tables=10 --point_selects=2  --index_updates=2 --non_index_updates=1 --delete_inserts=1 --report-interval=1 --mysql-host=127.0.0.2 --mysql-port=3308 --mysql-user=us_hammer --mysql-password='2P001' --mysql-db=hammer --time=120  run
 
 前台用户管理 
 commPlatform-admin.jar
@@ -2181,20 +2148,20 @@ gwcslifeApp.jar
 
 #加密 可逆 PostgreSQL14
 select encrypt('Q','PostgreSQL_NB','aes')
-不可逆 crypt('Qwerty1!', gen_salt('md5'))
+不可逆 crypt('q1234567890', gen_salt('md5'))
 #解密
 select convert_from(decrypt('\x7da7ddc71a5dece9c31259f1fce1de3b','PostgreSQL_NB272','aes'),'SQL_ASCII');
 
 #iptables 白名单配置
 #systemctl status iptables 运行状态 MySQL端口不可访问 本地通
 #开放端口 开放某个ip访问MySQL端口 重启iptables 失效
-iptables -I INPUT -s 192.168.97.91 -p TCP --dport 3306 -j ACCEPT
+iptables -I INPUT -s 127.0.0.1 -p TCP --dport 3306 -j ACCEPT
 #永久生效 service iptables save 重启iptables /etc/sysconfig/iptables文件可查看对应规则
 #开放某个端口
 iptables -I INPUT -p tcp --dport 8090 -j ACCEPT
 #关闭所有的8090端口
 iptables -I INPUT -p tcp --dport 8090 -j DROP
-iptables -I INPUT -s 192.168.97.91 -p tcp --dport 8090 -j ACCEPT
+iptables -I INPUT -s 127.0.0.1 -p tcp --dport 8090 -j ACCEPT
 
 
 20.205.243.166 github.com
@@ -2252,7 +2219,7 @@ mysql> select count(*) from sbtest1;
 1 row in set (0.06 sec)
 
 
-powershell .\bcp_queryout.ps1 -fileList "LAAssessMaintain:LAAssessMaintain" -src_server 192.168.100.106 -src_user sa -src_password Cmbjx3ccwtn9 -dst_server 172.18.100.157 -dst_user sa -dst_password qwerty1! -throttle 3
+powershell .\bcp_queryout.ps1 -fileList "LAAssessMaintain:LAAssessMaintain" -src_server 127.0.0.1 -src_user sa -src_password C1234567890 -dst_server 127.0.0.2 -dst_user sa -dst_password q1234567890 -throttle 3
 
 
 #下载可执行文件的tar包
@@ -2418,7 +2385,7 @@ Records: 358138  Deleted: 0  Skipped: 0  Warnings: 0
 
 
 #my2sql
-./my2sql -user lixl -password lixl -host 192.168.97.51 -port 3306 -mode file -local-binlog-file /data/mysql_8034/binlog/mysql-bin.000111 -work-type stats -start-file /data/mysql_8034/binlog/mysql-bin.000111 -output-dir ./tmpdir
+./my2sql -user lixl -password lixl -host 127.0.0.1 -port 3306 -mode file -local-binlog-file /data/mysql_8034/binlog/mysql-bin.000111 -work-type stats -start-file /data/mysql_8034/binlog/mysql-bin.000111 -output-dir ./tmpdir
 
 #PostGreSQL checkpoint，
 
@@ -2458,7 +2425,7 @@ https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_show-routi
 需要注意的是show_routine是一个global privilege，需要在全局授予，也即*.*，不能在库级别授予，否则，将会报如下错误：ERROR 1221 (HY000): Incorrect usage of DB GRANT and GLOBAL PRIVILEGES
 
 
-CREATE USER 'exporter'@'%' IDENTIFIED BY 'P@ssw0rd001!' WITH MAX_USER_CONNECTIONS 3;
+CREATE USER 'exporter'@'%' IDENTIFIED BY 'P001!' WITH MAX_USER_CONNECTIONS 3;
 GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%';
 
 
@@ -2649,7 +2616,7 @@ information_schema.INNODB_LOCK_WAITS a
 没有使用半同步也存在这种问题，sync阶段binlog落盘到commit阶段释放锁资源，这个时间差内的数据都存在上面问题，只是半同步放大这种问题
 
 #bcp-mssql
-powershell .\bcp_queryout.ps1 -fileList "F_CUSTOM:F_CUSTOM" -src_server 192.168.100.106 -src_db NissayLis -src_user sa -src_password Cmbjx3ccwtn9 -dst_server 172.18.100.157 -dst_db NissayLis_DB -dst_user sa -dst_password qwerty1! -throttle 5
+powershell .\bcp_queryout.ps1 -fileList "F_CUSTOM:F_CUSTOM" -src_server 127.0.0.1 -src_db NissayLis -src_user sa -src_password C1234567890 -dst_server 127.0.0.2 -dst_db NissayLis_DB -dst_user sa -dst_password q1234567890 -throttle 5
 
 
 #查询slow_log表中每天第一个慢查询的 start_time\query_time
@@ -2734,7 +2701,7 @@ WHERE TABLE_NAME='t_recments' AND CARDINALITY < '100000';
 
 # 参考{https://opensource.actionsky.com/20210915-mysql/}
 # 利用mysql-shell 做垂直拆表demo。
- MySQL  localhost  Py > conn1 = 'mysql://lixl:lixl@192.168.97.51:3306/testdb'
+ MySQL  localhost  Py > conn1 = 'mysql://lixl:lixl@127.0.0.1:3306/testdb'
  MySQL  localhost  Py > rs = mysql.get_classic_session(conn1);
  MySQL  localhost  Py > field_list = []
  MySQL  localhost  Py > for i in range(1, 1001):
@@ -2792,7 +2759,7 @@ Query OK, 10000 rows affected (0.2247 sec)
 Records: 10000  Duplicates: 0  Warnings: 0
 
 #mysql 5.7禁用ssl
- MySQL  Py > conn1 = 'mysql://root:Cmbjx3ccwtn9@172.18.100.59:3306/ats?ssl-mode=DISABLED'
+ MySQL  Py > conn1 = 'mysql://root:C1234567890@127.0.0.2:3306/ats?ssl-mode=DISABLED'
  MySQL  Py > rs = mysql.get_classic_session(conn1);
  MySQL  Py > rs.run_sql('select * from mysql.user')
 
