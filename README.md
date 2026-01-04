@@ -17,8 +17,8 @@
 ---
 -->
 
-Explore my technical notes and database insights:
+technical notes:
 
 ```bash
-git clone git@github.com:Kiirabi/blogf.git
-cd blogf
+git clone git@github.com:Kiirabi/blog.git
+cd blog
