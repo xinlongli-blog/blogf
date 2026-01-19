@@ -1,0 +1,196 @@
+创建数据库：
+CREATE DATABASE name
+[ [ WITH ] [ OWNER [=] user_name ]  -- ·OWNER [=] user_name：用于指定新建的数据库属于哪个用户，如果不指定，新建的数据库就属于当前执行命令的用户。
+[ TEMPLATE [=] template ]           -- ·TEMPLATE [=] template：模板名（从哪个模板创建新数据库），如果不指定，将使用默认模板数据库（template1）。
+[ ENCODING [=] encoding ]           -- ·[ENCODING [=] encoding]：创建新数据库使用的字符编码。比如使用ISO-8859-1（LATIN1）编码创建一个数据库时，代码：CREATE DATABASE testdb01 ENCODING 'LATIN1' TEMPLATE template0;
+[ LC_COLLATE [=] lc_collate ]       -- （需要将模板数据库指定为“template0”，不能指定为“template1”，这是因为编码和区域设置必须与模板数据库的编码和区域相匹配，如编码不匹配，）
+[ LC_CTYPE [=] lc_ctype ]           -- （或者包含了排序受LC_COLLATE和LC_CTYPE影响的索引那么复制这些数据将会导致数据库被新设置破坏。template0是公认的不包含任何会受字符集编码或排序影响的数据或索引）
+[ TABLESPACE [=] tablespace ]       -- ·TABLESPACE [=] tablespace：用于指定和新数据库关联的表空间名称。
+[ CONNECTION LIMIT [=] connlimit ] ]    -- 用于指定数据库可以接受多少并发的连接。默认值为“-1”，表示没有限制。
+                                        -- PostgreSQL数据库服务端并不支持汉字字符集GBK GB180 30，所以一般都是使用UTF8字符集来支持中文的。
+
+CREATE DATABASE testdb01;
+
+--将数据库“testdb01”的最大连接数修改为“10”
+alter database testdb01 CONNECTION LIMIT 10;
+
+alter database testdb01 rename to mydb01;
+alter database mydb01 rename to testdb01;
+
+--改变数据库“testdb01”的配置参数，使用户一旦连接到这个用户，某个配置参数就设置为指定的值。比如，关闭在数据库“testdb01”上的默认索引扫描
+ALTER DATABASE testdb01 SET enable_indexscan TO off;
+
+--注意,如果还有用户连接在这个数据库上，将无法删除该数据库
+SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname='test_user' AND pid<>pg_backend_pid();
+drop database test_user;
+
+--注意,不能在事务块中删除数据库,可以在事务块中修改数据库。
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+模式（Schema）:
+--允许多个用户使用同一个数据库且用户之间又不会互相干扰。
+--把数据库对象放在不同的模式下组织成逻辑组,方便管理。
+--第三方的应用可以放在不同的模式中，防止冲突。
+
+CREATE SCHEMA osdba;
+SELECT schema_name FROM information_schema.schemata ORDER BY schema_name;
+DROP SCHEMA osdba;
+
+--为用户“osdba”创建模式，模式名称也为“osdba”
+create role osdba;
+CREATE SCHEMA AUTHORIZATION osdba;
+
+--在创建一个模式的同时，还可以在该模式下创建表的视图
+CREATE SCHEMA osdba
+    CREATE TABLE t1 (id int, title text)
+    CREATE TABLE t2 (id int, content text)
+    CREATE VIEW v1 AS
+        SELECT a.id,a.title, b.content FROM t1 a, t2 b where a.id=b.id;
+
+SELECT n.nspname as "Schema",
+       c.relname as "Name",
+       CASE c.relkind
+           WHEN 'r' THEN 'table'
+           WHEN 'v' THEN 'view'
+           WHEN 'm' THEN 'materialized view'
+           WHEN 'i' THEN 'index'
+           WHEN 'S' THEN 'sequence'
+           WHEN 's' THEN 'special'
+           WHEN 'f' THEN 'foreign table'
+           WHEN 'p' THEN 'partitioned table'
+           WHEN 'I' THEN 'partitioned index'
+       END as "Type",
+       pg_catalog.pg_get_userbyid(c.relowner) as "Owner"
+FROM pg_catalog.pg_class c
+     LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+WHERE c.relkind IN ('r','p','v','m','S','f','')
+      AND n.nspname <> 'pg_catalog'
+      AND n.nspname <> 'information_schema'
+      AND n.nspname !~ '^pg_toast'
+      AND pg_catalog.pg_table_is_visible(c.oid)
+ORDER BY 1, 2;
+
+--修改名称
+alter schema osdba rename to osdbaold;
+
+--修改属主
+alter schema osdbaold owner to web;
+
+SELECT n.nspname AS "Name",
+       pg_catalog.pg_get_userbyid(n.nspowner) AS "Owner"
+FROM pg_catalog.pg_namespace n
+WHERE n.nspname !~ '^pg_toast' 
+  AND n.nspname !~ '^pg_temp'
+ORDER BY 1;
+
+--模式的搜索路径
+
+osdba=# SHOW search_path;
+search_path
+----------------
+"$user",public
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+索引：
+CREATE TABLE contacts(
+id int primary key,
+name varchar(40),
+phone varchar(32)[],
+address text
+);
+
+CREATE INDEX idx_contacts_name on contacts(name);
+
+CREATE INDEX idx_contacts_phone on contacts using gin(phone);
+
+--注意，“@>”是数组操作符，表示“包含”的意思，GIN索引能在“@>”上起作用
+SELECT * FROM contacts WHERE phone @> array['13422334455'::varchar(32)];
+drop index idx_contacts_phone;
+
+
+CREATE INDEX idx_contacts_name on contacts(name) WITH (FILLFACTOR=50);
+
+CREATE INDEX idx_contacts_name on contacts(name desc);
+
+--如果字段“name”中有空值，则可以在创建索引时指定空值排在非空值前面
+CREATE INDEX idx_contacts_name on contacts(name DESC NULLS FIRST);
+
+--也可以指定空值排在非空值后面：
+CREATE INDEX idx_contacts_name on contacts(name DESC NULLS LAST);
+
+ALTER INDEX idx_contacts_name RENAME TO idx_contacts_name_old;
+
+--把索引移到表空间“tbs_data01”下
+ALTER INDEX idx_contacts_name_old SET TABLESPACE tbs_data01;
+
+--把索引的填充因子“fillfactor”设置为“50”
+ALTER INDEX idx_contacts_name_old SET (fillfactor = 50);
+
+--填充因子重置为默认值
+ALTER INDEX idx_contacts_name_old RESET (fillfactor);
+
+--并发创建索引
+CREATE TABLE testtab01(id int primary key, note text);
+
+INSERT INTO testtab01 select generate_series(1,5000000), generate_series(1,5000000);
+
+-- new psql
+CREATE INDEX idx_testtab01_note on testtab01(note);
+
+DROP INDEX idx_testtab01_note;
+
+--创建索引时启用CONCURRENTLY选项 ,new psql 执行 DELETE FROM testtab01 where id=2;  会立即执行
+CREATE INDEX CONCURRENTLY idx_testtab01_note on testtab01(note);
+
+--PostgreSQL中在同个字段中可以建两个索引，频繁更新的表上 可以考虑 直接创建新的索引然后把旧的删掉
+CREATE INDEX CONCURRENTLY idx_testtab01_note on testtab01(note);
+
+CREATE INDEX CONCURRENTLY idx_testtab01_note_2 on testtab01(note); --注意，如果在索引创建过程中被强行取消可能会留下一个无效的索引，需手动删除
+DROP INDEX idx_testtab01_note;
+
+--删除索引
+CREATE TABLE class(
+class_no int,
+class_name varchar(40)
+);
+
+CREATE UNIQUE INDEX index_unique_class_no ON class(class_no);
+
+CREATE TABLE student(
+student_no int primary key,
+student_name varchar(40),
+age int,
+class_no int REFERENCES class(class_no)
+);
+
+--表“student”上的外键引用了表“class”上的唯一索引“index_unique_class_no”，这时想删除此索引，将会操作失败
+DROP INDEX index_unique_class_no;
+
+--此时加上“CASCADE”即可删除成功
+DROP INDEX index_unique_class_no CASCADE;
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+用户及权限管理
+--创建用户和角色的语法如下 [用户与角色是没有区别的，除了CREATE USER默认创建出来的用户有LOGIN权限，而CREATE ROLE创建出来的用户没有LOGIN权限之外，CREATE RULE与CREATE USER没有其他的区别]
+CREATE ROLE name [ [ WITH ] option [ ... ] ]
+CREATE USER name [ [ WITH ] option [ ... ] ]
+
+--这里的“option”可以为如下内容
+·SUPERUSER|NOSUPERUSER：表示创建出来的用户是否为超级用户。当然只有超级用户才能创建超级用户。
+·CREATEDB|NOCREATEDB：指定创建出来的用户是否有执行CREATE DATABASE的权限。
+·CREATEROLE|NOCREATEROLE：指定创建出来的用户是否有创建其他角色的权限。
+·CREATEUSER|NOCREATEUSER：指定创建出来的用户是否有创建其他用户的权限。
+·INHERIT|NOINHERIT：如果创建的用户拥有某个或某几个角色，这时若指定INHERIT，则表示用户自动拥有相应角色的权限，否则该用户没有相应角色的权限。
+·LOGIN|NOLOGIN：创建出来的用户是否有LOGIN权限，可以临时禁止用户的LOGIN权限，此时用户无法连接到数据库。
+·CONNECTION LIMIT connlimit：这个参数指明了该用户可以使用的并发连接的数量。默认值是“-1”，表示没有限制。
+·[ENCRYPTED|UNENCRYPTED]PASSWORD 'password'：用于控制存储在系统表中的口令是否加密。
+·VALID UNTIL 'timestamp'：密码失效时间，如果不指定该子句，那么口令将永远有效。
+·IN ROLE role_name [,...]：指定用户成为哪些角色的成员，请注意，没有任何选项可以把新角色添加为管理员，只有使用独立的GRANT命令才行。
+·IN GROUP role_name [,...]：与IN ROLE相同，是已过时的语法。
+·ROLE role_name [,...]：role_name将成为这个新建的角色的成员。
+·ADMIN role_name [,...]：role_name将有这个新建角色的WITH ADMIN OPTION权限。
+·USER role_name [,...]：与ROLE子句相同，但已过时。
+·SYSID uid：此子句主要是为了SQL向下兼容，实际没有什么用途。
+-- PostgreSQL DDL语句的权限 取决于 模式（SCEHME）中是否有CREATE的权限
