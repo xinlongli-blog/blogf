@@ -1,6 +1,6 @@
 # LINUX
 
-> waitwaitwait..
+> waitwaitwait...
 
 ------
 
