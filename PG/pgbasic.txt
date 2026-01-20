@@ -91,6 +91,38 @@ search_path
 ----------------
 "$user",public
 
+--注意，默认情况下每个人在public模式下都有CREATE和USAGE权限，也就是说，允许所有可以连接到指定数据库上的用户在这里创建对象
+--撤销权限：【第一个“public”是模式的名称，第二个“PUBLIC”的意思是“所有用户”】回收权限后，其他用户就不能在public模式下创建对象了
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+表
+create table test01(id int, note varchar(20));
+
+--如果表的主键只是由一个字段组成的
+create table test01(id int primary key, note varchar(20));
+
+--如果主键由两个及以上的字段组成（称为复合主键）
+CONSTRAINT constraint_name PRIMARY KEY (col1_name, col2_name,...)
+create table test02(id1 int, id2 int, note varchar(20), CONSTRAINT pk_test02 primary key(id1,id2));
+
+--建表的时候也可以指定唯一键
+CONSTRAINT constraint_name UNIQUE(col1_name, col2_name,...)
+create table test03(id1 int, id2 int, id3 int, note varchar(20), CONSTRAINT pk_test03 primary key(id1,id2), CONSTRAINT uk_test03_id3 UNIQUE(id3));
+
+--此外，check也是一种约束形式，用于定义某些字段的值必须满足某种要求
+CONSTRAINT constraint_name CHECK(expression)
+--[例如，建一张存储孩子信息的表“child”，其中的年龄字段（age）要求不能大于18岁]
+CREATE TABLE child(name varchar(20), age int, note text, CONSTRAINT ck_child_age CHECK(age <18));
+
+--还可以以其他表为模板来创建新表
+CREATE TABLE baby (LIKE child);
+--注意，此处创建的表没有把源表列上的约束复制过来。如果想完全复制源表列上的约束和其他信息，则需要加“INCLUDING”关键字 [“INCLUDING ALL”是把所有的属性全部复制过去]
+CREATE TABLE baby2 (LIKE child INCLUDING ALL);
+
+--也可以使用“CREATE TABLE...AS”来创建表
+CREATE TABLE baby2 AS SELECT * FROM child WITH NO DATA;
+
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 索引：
