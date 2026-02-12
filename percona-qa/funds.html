@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基金实时估值</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background-color: #f5f7fa; 
+            margin: 0; 
+            padding: 20px; 
+            color: #333; 
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05); 
+        }
+        
+        h2 { 
+            text-align: center; 
+            color: #303133; 
+            margin-bottom: 25px; 
+            font-weight: 600;
+            font-size: 24px;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            background-color: #f2f6fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #ebeef5;
+        }
+        .add-group { display: flex; gap: 8px; align-items: center; }
+        input[type="text"] { padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 4px; width: 110px; outline: none; }
+        select { padding: 8px; border: 1px solid #dcdfe6; border-radius: 4px; outline: none; }
+        
+        /* 按钮 */
+        button { cursor: pointer; padding: 8px 16px; border: none; border-radius: 4px; font-size: 14px; font-weight: 500; transition: 0.2s; }
+        .btn-add { background-color: #67c23a; color: white; }
+        .btn-refresh { background-color: #409eff; color: white; }
+        .btn-reset { background: none; color: #909399; font-size: 13px; padding: 0 10px; }
+        .btn-reset:hover { color: #606266; text-decoration: underline; }
+
+        /* 分区标题 */
+        .section-title {
+            margin-top: 30px; margin-bottom: 12px; padding-left: 10px;
+            border-left: 4px solid #409eff; font-size: 16px; font-weight: bold; color: #303133;
+            display: flex; align-items: center;
+        }
+        .title-t2 { border-left-color: #9c27b0; color: #303133; }
+        .tag { 
+            font-size: 12px; background: #f4f4f5; padding: 2px 8px; border-radius: 10px; 
+            margin-left: 10px; color: #909399; font-weight: normal; border: 1px solid #e9e9eb;
+        }
+
+        /* 表格样式 */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 14px; }
+        th { background-color: #f5f7fa; color: #606266; font-weight: 600; padding: 12px; text-align: left; border-bottom: 1px solid #ebeef5; }
+        td { padding: 12px; border-bottom: 1px solid #ebeef5; vertical-align: middle; color: #606266; }
+        /* 隔行变色 */
+        tr:nth-child(even) { background-color: #fafafa; }
+        tr:hover { background-color: #f0f2f5; }
+
+        /* 数据颜色 */
+        .up { color: #f56c6c; font-weight: bold; }   
+        .down { color: #67c23a; font-weight: bold; } 
+        .neutral { color: #909399; }
+        
+        .col-name { width: 40%; color: #303133; font-weight: 500; }
+        .col-code { width: 15%; color: #909399; font-family: monospace; }
+        .col-action { width: 20%; text-align: right; }
+
+        /* 行内按钮 */
+        .btn-small { padding: 5px 12px; font-size: 12px; margin-left: 6px; border-radius: 4px; }
+        .btn-info { background-color: #ecf5ff; color: #409eff; border: 1px solid #d9ecff; }
+        .btn-info:hover { background-color: #409eff; color: white; border-color: #409eff; }
+        .btn-del { background-color: #fef0f0; color: #f56c6c; border: 1px solid #fde2e2; }
+        .btn-del:hover { background-color: #f56c6c; color: white; border-color: #f56c6c; }
+
+        .status-text { font-size: 13px; color: #909399; margin-right: 15px; }
+        #countdown { font-weight: bold; color: #f56c6c; display: inline-block; width: 18px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📈 基金实时估值 </h2>
+    
+    <div class="control-panel">
+        <div class="add-group">
+            <input type="text" id="newFundCode" placeholder="代码 (6位)" maxlength="6">
+            <select id="fundType">
+                <option value="t1">T+1 (国内)</option>
+                <option value="t2">T+2 (QDII)</option>
+            </select>
+            <button class="btn-add" onclick="addNewFund()">添加</button>
+        </div>
+        
+        <div style="display: flex; align-items: center;">
+            <span class="status-text">自动刷新 <span id="countdown">15</span>s</span>
+            <span class="status-text">更新于 <span id="lastUpdateTime">--:--:--</span></span>
+            <button class="btn-refresh" onclick="refreshAll()">刷新</button>
+            <button class="btn-reset" onclick="resetDefaults()">重置默认列表</button>
+        </div>
+    </div>
+
+    <div class="section-title">
+        国内基金 <span class="tag">T+1</span>
+    </div>
+    <table id="tableT1">
+        <thead>
+            <tr>
+                <th class="col-name">基金名称</th>
+                <th class="col-code">代码</th>
+                <th>估值</th>
+                <th>涨跌幅</th>
+                <th class="col-action">操作</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyT1"></tbody>
+    </table>
+
+    <div class="section-title title-t2">
+        QDII / 海外 <span class="tag">T+2</span>
+    </div>
+    <table id="tableT2">
+        <thead>
+            <tr>
+                <th class="col-name">基金名称</th>
+                <th class="col-code">代码</th>
+                <th>估值</th>
+                <th>涨跌幅</th>
+                <th class="col-action">操作</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyT2"></tbody>
+    </table>
+
+</div>
+
+<script>
+    // ================= 35只基金完整配置 =================
+    
+    // T+1 (国内) - 15只
+    const DEFAULT_T1 = [
+        '012414', // 招商白酒
+        '011840', '002207', '161223', '022502', '018133', 
+        '006549', '018463', '380005', '021225', '014855', 
+        '017126', '007356', '011613', '380006'
+    ];
+
+    // T+2 (QDII/海外) - 20只
+    const DEFAULT_T2 = [
+        '017437', '018147', '024239', '014002', '021277', 
+        '018036', '539002', '005698', '017204', '016702', 
+        '013328', '501226', '021662', '006555', '021842', 
+        '008254', '050015', '020969', '968061', '968072'
+    ];
+
+    let fundsT1 = [], fundsT2 = [], countdownVal = 15, timer = null;
+
+    window.onload = function() {
+        loadData();
+        renderTables();
+        refreshAll();
+        startTimer();
+    };
+
+    function loadData() {
+        const storedT1 = localStorage.getItem('my_funds_t1_full');
+        const storedT2 = localStorage.getItem('my_funds_t2_full');
+        if (storedT1 && storedT2) {
+            fundsT1 = JSON.parse(storedT1);
+            fundsT2 = JSON.parse(storedT2);
+        } else {
+            fundsT1 = [...DEFAULT_T1];
+            fundsT2 = [...DEFAULT_T2];
+            saveData();
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('my_funds_t1_full', JSON.stringify(fundsT1));
+        localStorage.setItem('my_funds_t2_full', JSON.stringify(fundsT2));
+    }
+
+    // 重置逻辑：强制使用 DEFAULT 数组覆盖当前列表
+    function resetDefaults() {
+        if(confirm('确定要恢复到完整的 35 个基金列表吗？')) {
+            fundsT1 = [...DEFAULT_T1];
+            fundsT2 = [...DEFAULT_T2];
+            saveData();
+            renderTables();
+            refreshAll();
+        }
+    }
+
+    function renderTables() {
+        renderRows('tbodyT1', fundsT1);
+        renderRows('tbodyT2', fundsT2);
+    }
+
+    function renderRows(tbodyId, list) {
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = '';
+        list.forEach(code => {
+            const tr = document.createElement('tr');
+            tr.id = `row-${code}`;
+            tr.innerHTML = `
+                <td class="col-name">加载中...</td>
+                <td class="col-code">${code}</td>
+                <td class="est-val">--</td>
+                <td class="rate">--</td>
+                <td class="col-action">
+                    <button class="btn-small btn-info" onclick="openHoldings('${code}')">持仓</button>
+                    <button class="btn-small btn-del" onclick="deleteFund('${code}')">删除</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function addNewFund() {
+        const input = document.getElementById('newFundCode');
+        const code = input.value.trim();
+        const type = document.getElementById('fundType').value;
+        if (!/^\d{6}$/.test(code)) return alert("代码需为6位数字");
+        if (fundsT1.includes(code) || fundsT2.includes(code)) return alert("已存在");
+
+        (type === 't1' ? fundsT1 : fundsT2).push(code);
+        saveData(); renderTables(); fetchFundData(code); input.value = '';
+    }
+
+    function deleteFund(code) {
+        if(confirm(`确定删除 ${code} 吗？`)) {
+            fundsT1 = fundsT1.filter(c => c !== code);
+            fundsT2 = fundsT2.filter(c => c !== code);
+            saveData(); renderTables(); refreshAll();
+        }
+    }
+
+    function openHoldings(code) {
+        window.open(`http://fundf10.eastmoney.com/ccmx_${code}.html`, '_blank');
+    }
+
+    function jsonpgz(data) {
+        const row = document.getElementById(`row-${data.fundcode}`);
+        if (!row) return;
+
+        row.querySelector('.col-name').innerText = data.name;
+        row.querySelector('.est-val').innerText = data.gsz;
+
+        const rateCell = row.querySelector('.rate');
+        const rate = parseFloat(data.gszzl);
+        rateCell.innerText = (rate > 0 ? '+' : '') + data.gszzl + '%';
+        rateCell.className = 'rate ' + (rate > 0 ? 'up' : (rate < 0 ? 'down' : 'neutral'));
+    }
+
+    function fetchFundData(code) {
+        const script = document.createElement('script');
+        script.src = `http://fundgz.1234567.com.cn/js/${code}.js?rt=${Date.now()}`;
+        script.onerror = () => {
+            const row = document.getElementById(`row-${code}`);
+            if(row) {
+                row.querySelector('.col-name').innerText = "无数据";
+                row.querySelector('.col-name').style.color = "#f56c6c";
+            }
+        };
+        document.body.appendChild(script);
+        script.onload = () => { if(document.body.contains(script)) document.body.removeChild(script); }
+    }
+
+    function refreshAll() {
+        [...fundsT1, ...fundsT2].forEach(code => fetchFundData(code));
+        document.getElementById('lastUpdateTime').innerText = new Date().toLocaleTimeString();
+        countdownVal = 15;
+    }
+
+    function startTimer() {
+        if(timer) clearInterval(timer);
+        timer = setInterval(() => {
+            countdownVal--;
+            document.getElementById('countdown').innerText = countdownVal;
+            if (countdownVal <= 0) refreshAll();
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
