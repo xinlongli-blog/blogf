@@ -289,6 +289,20 @@ xtrabackup 是用来备份 InnoDB 表的，不能备份非 InnoDB 表，和 mysq
   
 - /usr/local/mysql/bin/mysqldump -h172.28.249.87 -uroot -p -P3306 --databases csdev --no-data --triggers --routines --events --add-drop-database --create-options --set-gtid-purged=OFF --log-error=/root/csdev20250801.log > /root/csdev20250801.sql
 
+```sql
+#单库sql不生成 不带 --databases，仅将其作为数据库名传入
+/usr/local/mysql/bin/mysqldump -h 127.0.0.1 -P 3306 -uroot -p --single-transaction --skip-opt --triggers --routines --events --source-data=2 --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --set-gtid-purged=OFF --log-error=/opt/mysqldump_log.log acct > /opt/acct.sql
+```
+
+```sql
+#压缩备份导入
+/usr/local/mysql/bin/mysqldump -h 127.0.0.1 -P 3306 -uroot -p --single-transaction --skip-opt --triggers --routines --events --source-data=2 --create-options --complete-insert --extended-insert --disable-keys --set-charset --tz-utc --quick --set-gtid-purged=OFF --log-error=/opt/mysqldump_log.log acct | gzip > /opt/acct.sql.gz
+
+zcat /opt/acct.sql.gz | /usr/local/mysql/bin/mysql -h 127.0.0.1 -P 3306 -uroot -p acct2
+```
+
+
+
 **从all database 中恢复单表：**
 
 ```sql
