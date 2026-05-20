@@ -2839,3 +2839,8 @@ ALTER TABLE tbl_name DISCARD TABLESPACE;
 4.发出以下ALTER TABLE语句，告诉InnoDB您将新 .ibd文件用于表：
 ALTER TABLE tbl_name IMPORT TABLESPACE;
 ```
+
+网盘信息链接 [Proton Driver]  Private
+```sql
+https://drive.proton.me/urls/SVHSTJBGC8#yJBo5uTs18An
+```
