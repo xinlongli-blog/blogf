@@ -43,6 +43,19 @@
 > print_bulkfile       1988     0.0008       0.02
 > other                   0     0.1690       4.61
 
+归档不删除
+```sql
+pt-archiver --source u=root,p=123,h=127.0.0.1,P=3306,D=gds_maap,t=t_message_send  \
+--dest u=root,p=123,h=127.0.0.1,P=3306,D=gds_maap,t=t_message_send_2024 --where "TransTime < '2025-01-01 00:00:00'" \
+--progress=2000 --statistics --bulk-insert --bulk-delete --txn-size=2000 --limit=2000 --no-delete \
+--no-check-charset --skip-foreign-key-checks --dry-run
+```
+删除
+```sql
+pt-archiver --source u=root,p=123,h=127.0.0.1,P=3306,D=gds_maap,t=t_message_send --where "TransTime < '2025-01-01 00:00:00'" \
+  --progress 2000 --statistics --bulk-delete --txn-size 2000 --limit 2000 --purge --no-check-charset --skip-foreign-key-checks --dry-run
+```
+
 ### 注：
 
 1. 案例source表中有1989条数据、pt-archiver会默认对自增列字段的最大值“max(id)”的数据进项保护、不归档也不删除；目的是为了防止auto_increment值重置，防止数据冲突、一旦该值重置、会出现相同自增ID，会导致下一次的归档失败，影响归档简洁影响业务。--nosafe-auto-increment此参数可解决归档部分数据时包含自增列auto_increment字段最大值。只做归档不删除数据的情况下可以一直使用此参数--nosafe-auto-increment，8.0版本不会重置auto_increment
